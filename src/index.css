@@ -28,6 +28,8 @@
     margin: 0;
     padding: 0;
     display: block !important;
+    min-height: 100vh;
+    height: auto;
   }
 }
 
@@ -254,7 +256,8 @@ body::before {
   width: 100%;
   outline: none;
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-bottom: 8px;
 }
 .input-with-icon {
   padding-left: 44px !important;
