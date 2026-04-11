@@ -49,8 +49,10 @@ function App() {
   const fallbackPath = currentRole === 'farmer' ? '/farmer/details' : currentRole === 'consumer' ? '/home' : '/';
 
   return (
-    <div className="min-h-screen flex flex-col relative z-10">
-      <Navbar />
+    <div className="min-h-screen relative z-10 flex flex-col">
+      <header className="fixed top-0 left-0 right-0 z-[1000]">
+        <Navbar />
+      </header>
       <main className="flex-1">
         <Suspense fallback={<PageLoader />}>
           <Routes>

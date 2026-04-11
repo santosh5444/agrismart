@@ -34,12 +34,13 @@
   }
 }
 
-/* Force everything to start at the top */
-#root {
+/* Force everything to start at the top and account for Fixed Navbar */
+main {
+  padding-top: 70px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
-  align-items: stretch !important;
+  width: 100%;
 }
 
 /* ── Galaxy Grid Background ─────────────────────────────── */

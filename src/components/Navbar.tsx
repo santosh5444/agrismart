@@ -13,7 +13,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[9999] glass" style={{
+    <nav className="w-full glass" style={{
+      background: 'rgba(10, 20, 30, 0.6)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
       borderBottom: '1px solid rgba(34,197,94,0.15)',
       boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(34,197,94,0.1)'
     }}>

@@ -60,7 +60,7 @@ export default function FarmerLogin() {
   };
 
   return (
-    <div className="flex justify-center items-start min-h-screen relative px-4 pt-32 pb-12 overflow-hidden">
+    <div className="flex justify-center items-start min-h-screen relative px-4 pt-4 pb-12 overflow-hidden">
       {/* Floating emojis */}
       {VEGGIES.map((v, i) => (
         <div key={i} className="absolute text-3xl select-none pointer-events-none" style={{
