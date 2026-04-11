@@ -25,6 +25,9 @@
     min-height: 100vh;
     color: #e2e8f0;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    display: block !important;
   }
 }
 

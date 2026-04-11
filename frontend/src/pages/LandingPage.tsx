@@ -31,7 +31,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="relative min-h-[calc(100vh-64px)] flex flex-col items-center justify-start overflow-hidden px-4 pt-32 pb-8">
+    <div className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden px-4 pt-24 pb-12">
 
       {/* ── Background neon orbs ───────────────────── */}
       <div className="orb orb-green w-[600px] h-[600px] -top-40 -left-40 animate-float-slow" />
