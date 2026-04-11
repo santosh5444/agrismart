@@ -30,7 +30,16 @@
     display: block !important;
     min-height: 100vh;
     height: auto;
+    position: relative;
   }
+}
+
+/* Force everything to start at the top */
+#root {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
 }
 
 /* ── Galaxy Grid Background ─────────────────────────────── */

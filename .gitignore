@@ -6,20 +6,15 @@ __pycache__/
 env/
 venv/
 ENV/
-<<<<<<< HEAD
-=======
 backend/ml_model/*.pkl
 backend/ml_model/model_info.json
 backend/data/*.csv
 backend/users.json
 backend/crops.json
->>>>>>> 83e8c66 (Optimize login performance (bcrypt rounds & caching))
 
 # Node
 node_modules/
-frontend/node_modules/
 dist/
-frontend/dist/
 *.log
 
 # IDE
@@ -31,11 +26,7 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
-<<<<<<< HEAD
 
 # Env
 *.env
 .env
-frontend/.env
-=======
->>>>>>> 83e8c66 (Optimize login performance (bcrypt rounds & caching))
