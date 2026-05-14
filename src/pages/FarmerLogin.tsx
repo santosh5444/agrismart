@@ -117,21 +117,21 @@ export default function FarmerLogin() {
 
             {error && <div className={`p-2.5 text-xs rounded-xl mb-4 font-medium ${error.includes('created') ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'}`}>{error}</div>}
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {!isLogin && (
                 <>
-                  <div className="relative"><User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-green-300/60 z-10" /><input type="text" placeholder="Full Name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="input-dark input-with-icon" /></div>
-                  <div className="relative"><Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-green-300/60 z-10" /><input type="tel" placeholder="Mobile Number" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} className="input-dark input-with-icon" /></div>
+                  <div className="relative"><User className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-green-300/60 z-10" /><input type="text" placeholder="Full Name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="input-dark input-with-icon" /></div>
+                  <div className="relative"><Phone className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-green-300/60 z-10" /><input type="tel" placeholder="Mobile Number" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} className="input-dark input-with-icon" /></div>
                 </>
               )}
 
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-green-300/60 z-10" />
+                <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-green-300/60 z-10" />
                 <input type={isLogin ? "text" : "email"} placeholder={isLogin ? "Email or Mobile" : "Email Address"} required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="input-dark input-with-icon" />
               </div>
 
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-green-300/60 z-10" />
+                <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-green-300/60 z-10" />
                 <input type="password" placeholder="Password" required value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="input-dark input-with-icon" />
               </div>
 
