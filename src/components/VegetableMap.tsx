@@ -57,7 +57,7 @@ export default function VegetableMap({ locations }: MapProps) {
   const center: [number, number] = [15.9129, 79.7400];
 
   return (
-    <div className="h-[400px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner rtl" style={{isolation: 'isolate'}}>
+    <div className="h-[400px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner" style={{isolation: 'isolate'}}>
       <MapContainer 
         center={center} 
         zoom={6} 

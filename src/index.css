@@ -36,11 +36,11 @@
 
 /* Force everything to start at the top and account for Fixed Navbar */
 main {
-  padding-top: 70px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
+  padding-top: 64px; /* Space for navbar */
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  min-height: calc(100vh - 64px);
 }
 
 /* ── Galaxy Grid Background ─────────────────────────────── */
