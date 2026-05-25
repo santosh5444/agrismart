@@ -1,0 +1,25 @@
+services:
+  # 1. Frontend: Static Site
+  - type: static
+    name: agrismart-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+
+  # 2. Backend: Python API
+  # NOTE: Render uses backend/ as root (detected via backend/.python-version)
+  - type: web
+    name: agrismart-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: PORT
+        value: 10000

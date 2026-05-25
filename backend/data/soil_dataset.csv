@@ -1,0 +1,13 @@
+district_id,soil_type,pH_min,pH_max,organic_matter
+1,Black Soil,5.87,6.8,2.02
+2,Black Soil,5.68,7.79,1.09
+3,Black Soil,6.29,7.1,2.22
+4,Black Soil,5.8,7.75,1.64
+5,Black Soil,5.88,7.12,1.49
+6,Alluvial Soil,6.39,6.7,1.52
+7,Sandy Soil,5.75,7.03,2.23
+8,Sandy Soil,6.33,6.61,1.74
+9,Red Soil,5.67,6.75,2.1
+10,Red Soil,6.38,7.71,1.98
+11,Black Soil,6.34,7.75,1.29
+12,Sandy Soil,5.84,6.86,2.41

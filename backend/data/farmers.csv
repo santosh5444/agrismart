@@ -1,0 +1,201 @@
+farmer_id,name,district_id,vegetables_grown,phone,whatsapp,email,land_acres
+1,Ramesh Reddy,11,Cabbage,9903074141,9927170641,farmer1@mail.com,7.76
+2,Manoj Kumar,10,Cabbage,9223064742,9526524070,farmer2@mail.com,10.73
+3,Vijay Reddy,4,Green Chilli,9689469405,9709059966,farmer3@mail.com,2.69
+4,Ramesh Naidu,12,Bottle Gourd,9264576346,9178716997,farmer4@mail.com,8.85
+5,Suresh Kumar,10,Potato,9717324939,9651669379,farmer5@mail.com,16.97
+6,Vijay Kumar,8,Green Chilli,9702306781,9416710648,farmer6@mail.com,9.21
+7,Mahesh Reddy,2,Cabbage,9903203759,9862216831,farmer7@mail.com,2.66
+8,Kiran Rao,11,Okra,9668364036,9442240702,farmer8@mail.com,18.73
+9,Arjun Naidu,3,Onion,9228841094,9285513092,farmer9@mail.com,17.55
+10,Kiran Naidu,4,Okra,9918528772,9929745033,farmer10@mail.com,19.29
+11,Kiran Rao,7,Cauliflower,9332149738,9832953058,farmer11@mail.com,15.6
+12,Mahesh Naidu,3,Cauliflower,9334223841,9503198366,farmer12@mail.com,19.8
+13,Ajay Naidu,4,Spinach,9837681522,9492973342,farmer13@mail.com,7.6
+14,Manoj Kumar,1,Bottle Gourd,9810638635,9689510627,farmer14@mail.com,1.75
+15,Mahesh Reddy,5,Okra,9970863348,9670597955,farmer15@mail.com,7.29
+16,Naresh Kumar,7,Cauliflower,9236211252,9738766288,farmer16@mail.com,8.65
+17,Vijay Naidu,9,Okra,9381427078,9661859088,farmer17@mail.com,4.33
+18,Vijay Naidu,6,Potato,9462620930,9710751100,farmer18@mail.com,19.83
+19,Ramesh Kumar,11,Spinach,9385370627,9473392479,farmer19@mail.com,16.98
+20,Vijay Rao,2,Brinjal,9354895416,9523087699,farmer20@mail.com,3.11
+21,Suresh Reddy,2,Tomato,9306426478,9977198265,farmer21@mail.com,10.29
+22,Arjun Naidu,7,Cauliflower,9735363909,9845042780,farmer22@mail.com,17.53
+23,Ravi Kumar,7,Spinach,9408358804,9608466783,farmer23@mail.com,6.43
+24,Mahesh Reddy,5,Potato,9742719390,9198852107,farmer24@mail.com,11.04
+25,Suresh Naidu,5,Onion,9409559028,9558324107,farmer25@mail.com,12.9
+26,Mahesh Kumar,6,Onion,9173456633,9721784242,farmer26@mail.com,18.42
+27,Ajay Reddy,8,Spinach,9933737427,9151664175,farmer27@mail.com,14.95
+28,Suresh Rao,8,Spinach,9179152391,9259057329,farmer28@mail.com,14.68
+29,Kiran Rao,1,Cabbage,9962530446,9360729893,farmer29@mail.com,19.95
+30,Ajay Reddy,7,Spinach,9219117790,9543655905,farmer30@mail.com,18.93
+31,Kiran Rao,2,Cabbage,9915923655,9820934108,farmer31@mail.com,12.61
+32,Vijay Kumar,10,Potato,9655207419,9552634038,farmer32@mail.com,2.67
+33,Kiran Reddy,4,Potato,9478873352,9518990979,farmer33@mail.com,4.75
+34,Suresh Rao,5,Bottle Gourd,9659293335,9114361889,farmer34@mail.com,7.93
+35,Vijay Reddy,9,Okra,9583845147,9892385343,farmer35@mail.com,1.73
+36,Ravi Kumar,5,Bottle Gourd,9616358302,9836817226,farmer36@mail.com,17.02
+37,Kiran Reddy,6,Cauliflower,9123916666,9559856503,farmer37@mail.com,6.61
+38,Vijay Kumar,4,Onion,9802697404,9113931193,farmer38@mail.com,6.49
+39,Ravi Naidu,5,Bottle Gourd,9331539554,9971791902,farmer39@mail.com,8.79
+40,Naresh Rao,10,Potato,9477793379,9206936639,farmer40@mail.com,15.26
+41,Arjun Kumar,10,Potato,9434792571,9873779023,farmer41@mail.com,15.88
+42,Naresh Rao,3,Bottle Gourd,9297007254,9694153025,farmer42@mail.com,5.02
+43,Kiran Rao,4,Green Chilli,9834565528,9523987056,farmer43@mail.com,3.94
+44,Vijay Reddy,2,Onion,9295427675,9802858591,farmer44@mail.com,16.01
+45,Naresh Naidu,11,Potato,9487754362,9762116793,farmer45@mail.com,13.71
+46,Vijay Kumar,2,Green Chilli,9460267133,9579613598,farmer46@mail.com,8.84
+47,Ajay Kumar,4,Cauliflower,9768117882,9915996621,farmer47@mail.com,17.23
+48,Suresh Reddy,1,Cabbage,9800255803,9956795089,farmer48@mail.com,10.61
+49,Arjun Reddy,1,Cabbage,9274889649,9358011909,farmer49@mail.com,2.8
+50,Naresh Naidu,1,Spinach,9498955959,9227172116,farmer50@mail.com,3.13
+51,Ramesh Reddy,10,Tomato,9563177361,9574231839,farmer51@mail.com,18.41
+52,Kiran Naidu,3,Green Chilli,9592472043,9242988087,farmer52@mail.com,14.57
+53,Vijay Reddy,5,Onion,9307208829,9621245341,farmer53@mail.com,1.04
+54,Suresh Reddy,12,Tomato,9309312818,9797443523,farmer54@mail.com,18.61
+55,Ajay Kumar,10,Green Chilli,9345554733,9375769994,farmer55@mail.com,9.56
+56,Kiran Kumar,10,Green Chilli,9223809749,9299233631,farmer56@mail.com,14.78
+57,Ajay Naidu,2,Cauliflower,9302952737,9185422462,farmer57@mail.com,6.26
+58,Manoj Naidu,5,Green Chilli,9720190061,9169423418,farmer58@mail.com,16.4
+59,Naresh Kumar,9,Onion,9109038022,9746248984,farmer59@mail.com,2.89
+60,Ravi Rao,8,Onion,9193288704,9989661967,farmer60@mail.com,5.8
+61,Mahesh Rao,2,Onion,9978070417,9397377091,farmer61@mail.com,14.47
+62,Vijay Rao,4,Cabbage,9818118612,9423225202,farmer62@mail.com,14.42
+63,Ramesh Rao,4,Okra,9176201857,9593947438,farmer63@mail.com,5.01
+64,Manoj Naidu,8,Okra,9269489964,9427209552,farmer64@mail.com,16.83
+65,Mahesh Naidu,2,Brinjal,9712218380,9950432557,farmer65@mail.com,3.77
+66,Ajay Naidu,3,Brinjal,9329677765,9587490379,farmer66@mail.com,14.17
+67,Manoj Naidu,5,Tomato,9239084969,9244989937,farmer67@mail.com,19.39
+68,Ajay Rao,2,Brinjal,9708050532,9819753818,farmer68@mail.com,18.87
+69,Kiran Naidu,2,Spinach,9150132783,9154000656,farmer69@mail.com,8.01
+70,Ajay Naidu,2,Cabbage,9898484682,9488096810,farmer70@mail.com,3.6
+71,Mahesh Rao,4,Spinach,9932637188,9684501314,farmer71@mail.com,19.46
+72,Arjun Naidu,2,Green Chilli,9717620565,9159229831,farmer72@mail.com,8.67
+73,Manoj Kumar,2,Bottle Gourd,9835129008,9893492237,farmer73@mail.com,9.36
+74,Manoj Naidu,4,Cauliflower,9444763743,9331927667,farmer74@mail.com,8.99
+75,Manoj Naidu,2,Potato,9861920605,9644347526,farmer75@mail.com,16.66
+76,Manoj Kumar,11,Bottle Gourd,9866796852,9739795982,farmer76@mail.com,12.88
+77,Ramesh Kumar,5,Brinjal,9969784027,9711729990,farmer77@mail.com,10.9
+78,Ramesh Naidu,6,Okra,9480075967,9413206216,farmer78@mail.com,11.12
+79,Vijay Reddy,4,Cabbage,9297654769,9499776653,farmer79@mail.com,19.93
+80,Naresh Reddy,7,Green Chilli,9278007421,9766481385,farmer80@mail.com,16.77
+81,Ajay Kumar,10,Onion,9435456290,9918552580,farmer81@mail.com,10.63
+82,Arjun Kumar,7,Cabbage,9655889500,9351519613,farmer82@mail.com,16.64
+83,Naresh Rao,4,Potato,9315652084,9561179615,farmer83@mail.com,1.19
+84,Mahesh Reddy,7,Cauliflower,9982935896,9275443933,farmer84@mail.com,10.31
+85,Suresh Rao,6,Potato,9517619552,9790711183,farmer85@mail.com,18.02
+86,Mahesh Kumar,5,Cabbage,9577719405,9323867635,farmer86@mail.com,6.18
+87,Arjun Reddy,7,Brinjal,9484951618,9489734535,farmer87@mail.com,1.5
+88,Arjun Kumar,1,Cabbage,9254655487,9727387560,farmer88@mail.com,19.39
+89,Vijay Naidu,10,Cauliflower,9653642513,9934122836,farmer89@mail.com,19.87
+90,Manoj Reddy,10,Bottle Gourd,9357430774,9658804972,farmer90@mail.com,16.22
+91,Manoj Rao,4,Potato,9574143986,9966974359,farmer91@mail.com,12.51
+92,Arjun Rao,6,Cauliflower,9625684004,9836162803,farmer92@mail.com,6.05
+93,Naresh Kumar,2,Cabbage,9766661612,9816376985,farmer93@mail.com,19.75
+94,Manoj Naidu,9,Brinjal,9750178489,9492583612,farmer94@mail.com,8.61
+95,Mahesh Naidu,12,Potato,9740706311,9909661592,farmer95@mail.com,15.78
+96,Kiran Naidu,5,Tomato,9491256530,9901191428,farmer96@mail.com,15.38
+97,Vijay Naidu,6,Onion,9275011731,9578916423,farmer97@mail.com,16.1
+98,Kiran Rao,11,Okra,9944799123,9178694930,farmer98@mail.com,2.38
+99,Manoj Rao,9,Cauliflower,9157304561,9759609296,farmer99@mail.com,19.33
+100,Mahesh Reddy,9,Cauliflower,9585737538,9205522082,farmer100@mail.com,13.9
+101,Ajay Rao,8,Spinach,9736716956,9462351941,farmer101@mail.com,13.44
+102,Ajay Naidu,12,Cabbage,9879531016,9486769028,farmer102@mail.com,12.11
+103,Arjun Naidu,9,Okra,9493978231,9230463065,farmer103@mail.com,16.77
+104,Suresh Kumar,10,Potato,9861302047,9864993846,farmer104@mail.com,10.59
+105,Mahesh Reddy,10,Cabbage,9736270825,9510349873,farmer105@mail.com,16.9
+106,Ajay Naidu,4,Green Chilli,9819742903,9174581741,farmer106@mail.com,11.6
+107,Ajay Reddy,1,Tomato,9754630033,9779832401,farmer107@mail.com,18.08
+108,Suresh Rao,4,Potato,9550354391,9538089721,farmer108@mail.com,5.91
+109,Ajay Naidu,9,Onion,9779723605,9505614390,farmer109@mail.com,9.73
+110,Manoj Rao,3,Potato,9464711846,9647519797,farmer110@mail.com,19.88
+111,Suresh Reddy,6,Tomato,9889412562,9111888143,farmer111@mail.com,8.02
+112,Mahesh Kumar,2,Cabbage,9560612421,9777183901,farmer112@mail.com,10.85
+113,Ramesh Kumar,1,Onion,9785178318,9535620540,farmer113@mail.com,11.53
+114,Ajay Reddy,12,Green Chilli,9338955983,9626099396,farmer114@mail.com,8.06
+115,Manoj Reddy,9,Tomato,9739049057,9180738408,farmer115@mail.com,1.31
+116,Ravi Kumar,1,Onion,9303948252,9165143834,farmer116@mail.com,17.95
+117,Suresh Kumar,8,Spinach,9237972855,9406202390,farmer117@mail.com,10.02
+118,Naresh Rao,9,Onion,9867253365,9383680300,farmer118@mail.com,14.53
+119,Kiran Reddy,5,Okra,9131408171,9780651819,farmer119@mail.com,10.63
+120,Ravi Rao,2,Green Chilli,9367038596,9335759269,farmer120@mail.com,3.23
+121,Ravi Reddy,9,Cabbage,9188671499,9970476498,farmer121@mail.com,3.09
+122,Ajay Reddy,6,Potato,9812730046,9499620388,farmer122@mail.com,17.32
+123,Ramesh Reddy,8,Tomato,9643462984,9848453960,farmer123@mail.com,10.22
+124,Ajay Naidu,3,Okra,9115257109,9124252844,farmer124@mail.com,2.17
+125,Ravi Reddy,11,Potato,9708460603,9795127119,farmer125@mail.com,14.05
+126,Manoj Reddy,1,Bottle Gourd,9441612729,9956776900,farmer126@mail.com,17.83
+127,Arjun Reddy,3,Green Chilli,9982200939,9616215820,farmer127@mail.com,3.15
+128,Suresh Rao,2,Bottle Gourd,9942226484,9753988403,farmer128@mail.com,18.9
+129,Ramesh Kumar,6,Potato,9619238942,9341603270,farmer129@mail.com,19.35
+130,Manoj Reddy,6,Potato,9637329921,9126068446,farmer130@mail.com,4.36
+131,Ramesh Rao,5,Spinach,9793113194,9432817667,farmer131@mail.com,16.94
+132,Mahesh Rao,6,Potato,9973790518,9438018075,farmer132@mail.com,6.68
+133,Naresh Naidu,3,Spinach,9838470796,9695024824,farmer133@mail.com,19.28
+134,Naresh Reddy,3,Spinach,9711457141,9137306658,farmer134@mail.com,6.65
+135,Suresh Reddy,10,Brinjal,9579946188,9307378709,farmer135@mail.com,4.38
+136,Naresh Kumar,6,Potato,9713303119,9842093433,farmer136@mail.com,2.67
+137,Ajay Kumar,3,Tomato,9508035954,9937751803,farmer137@mail.com,11.23
+138,Kiran Naidu,3,Spinach,9893876935,9256373407,farmer138@mail.com,11.55
+139,Kiran Kumar,5,Tomato,9672941370,9732201733,farmer139@mail.com,18.17
+140,Arjun Naidu,4,Cauliflower,9731424574,9413329642,farmer140@mail.com,16.39
+141,Ramesh Naidu,3,Tomato,9377955068,9661900157,farmer141@mail.com,5.29
+142,Naresh Kumar,5,Cauliflower,9460732100,9356993531,farmer142@mail.com,8.78
+143,Naresh Kumar,10,Bottle Gourd,9469405396,9130034363,farmer143@mail.com,18.14
+144,Manoj Rao,1,Potato,9921653555,9292396985,farmer144@mail.com,1.24
+145,Vijay Reddy,7,Okra,9381142919,9197867069,farmer145@mail.com,7.85
+146,Ajay Naidu,10,Bottle Gourd,9496479896,9565206512,farmer146@mail.com,11.49
+147,Mahesh Rao,1,Cauliflower,9698615078,9634498809,farmer147@mail.com,3.13
+148,Ajay Kumar,4,Onion,9710401050,9211523925,farmer148@mail.com,12.24
+149,Naresh Naidu,8,Onion,9287923213,9360437013,farmer149@mail.com,7.19
+150,Ramesh Naidu,3,Cabbage,9743269022,9679172858,farmer150@mail.com,17.7
+151,Suresh Rao,7,Cabbage,9159046243,9607339667,farmer151@mail.com,13.11
+152,Manoj Reddy,11,Cauliflower,9546731871,9827056805,farmer152@mail.com,14.87
+153,Ajay Rao,10,Okra,9924829916,9144141818,farmer153@mail.com,17.73
+154,Ramesh Rao,7,Onion,9574888588,9122634571,farmer154@mail.com,7.58
+155,Ramesh Rao,11,Brinjal,9673764302,9374299153,farmer155@mail.com,19.93
+156,Manoj Naidu,5,Potato,9458184538,9852039224,farmer156@mail.com,1.23
+157,Vijay Rao,10,Bottle Gourd,9903347747,9766618095,farmer157@mail.com,8.02
+158,Ramesh Rao,1,Cabbage,9365169982,9472089301,farmer158@mail.com,11.88
+159,Ravi Naidu,11,Bottle Gourd,9120212210,9476937897,farmer159@mail.com,18.22
+160,Ramesh Rao,2,Brinjal,9416437939,9715592842,farmer160@mail.com,7.43
+161,Arjun Rao,2,Tomato,9704168335,9576811109,farmer161@mail.com,15.69
+162,Mahesh Rao,3,Okra,9412103802,9996245943,farmer162@mail.com,17.55
+163,Ramesh Rao,2,Potato,9342633919,9802606858,farmer163@mail.com,7.09
+164,Manoj Kumar,11,Cabbage,9381234732,9637565935,farmer164@mail.com,2.18
+165,Ramesh Naidu,5,Green Chilli,9461961901,9245081555,farmer165@mail.com,11.15
+166,Kiran Reddy,1,Potato,9945803730,9241078975,farmer166@mail.com,3.4
+167,Manoj Kumar,7,Onion,9560880582,9119774059,farmer167@mail.com,9.21
+168,Mahesh Kumar,7,Cabbage,9239779790,9915974285,farmer168@mail.com,12.79
+169,Manoj Naidu,4,Spinach,9565793863,9368974082,farmer169@mail.com,13.88
+170,Naresh Naidu,4,Tomato,9212555781,9696666978,farmer170@mail.com,8.41
+171,Mahesh Kumar,11,Potato,9109322674,9457902825,farmer171@mail.com,6.84
+172,Arjun Kumar,6,Cauliflower,9993273125,9405902695,farmer172@mail.com,7.7
+173,Suresh Reddy,4,Bottle Gourd,9295633281,9761570733,farmer173@mail.com,9.58
+174,Arjun Reddy,9,Spinach,9836688957,9331050327,farmer174@mail.com,2.09
+175,Ravi Rao,11,Cabbage,9578979877,9829991987,farmer175@mail.com,15.72
+176,Ravi Naidu,11,Cabbage,9858367885,9908894553,farmer176@mail.com,11.05
+177,Arjun Naidu,7,Green Chilli,9727936269,9630162240,farmer177@mail.com,15.65
+178,Manoj Naidu,3,Cabbage,9510909734,9107555423,farmer178@mail.com,13.47
+179,Suresh Naidu,12,Onion,9306342267,9147654926,farmer179@mail.com,5.56
+180,Ajay Kumar,12,Tomato,9336984576,9868414102,farmer180@mail.com,5.57
+181,Vijay Rao,8,Green Chilli,9379552940,9908778061,farmer181@mail.com,19.97
+182,Ajay Naidu,5,Okra,9616926550,9258778021,farmer182@mail.com,17.25
+183,Ravi Rao,3,Cauliflower,9169360961,9515840166,farmer183@mail.com,14.4
+184,Suresh Reddy,8,Green Chilli,9114836561,9517579644,farmer184@mail.com,5.51
+185,Arjun Rao,10,Cauliflower,9132503971,9955266620,farmer185@mail.com,18.61
+186,Ramesh Naidu,5,Bottle Gourd,9715157812,9530221620,farmer186@mail.com,15.45
+187,Ravi Naidu,11,Potato,9706830695,9404578347,farmer187@mail.com,17.31
+188,Arjun Reddy,8,Brinjal,9699959493,9600023375,farmer188@mail.com,4.69
+189,Ramesh Rao,5,Green Chilli,9270963250,9315257420,farmer189@mail.com,11.39
+190,Kiran Rao,8,Bottle Gourd,9581183174,9303998332,farmer190@mail.com,6.97
+191,Ramesh Reddy,11,Cauliflower,9115477273,9281986909,farmer191@mail.com,2.54
+192,Manoj Rao,9,Okra,9928835532,9967677879,farmer192@mail.com,11.57
+193,Suresh Kumar,2,Brinjal,9296118392,9489558826,farmer193@mail.com,7.45
+194,Suresh Naidu,2,Onion,9916023817,9207078530,farmer194@mail.com,4.79
+195,Suresh Rao,9,Tomato,9418998696,9187360266,farmer195@mail.com,14.64
+196,Ravi Naidu,9,Okra,9819499882,9966304277,farmer196@mail.com,12.14
+197,Kiran Reddy,10,Spinach,9253321462,9540005460,farmer197@mail.com,1.53
+198,Ramesh Kumar,12,Onion,9799506950,9578335299,farmer198@mail.com,2.61
+199,Suresh Kumar,10,Spinach,9119563029,9325632417,farmer199@mail.com,5.76
+200,Naresh Naidu,11,Onion,9809258923,9504487782,farmer200@mail.com,17.43
