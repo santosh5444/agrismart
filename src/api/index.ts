@@ -6,7 +6,7 @@ const isDev = (import.meta as any).env.DEV;
 // Prioritize the environment variable, fallback to default Render URL for production
 const API_BASE_URL = isDev
   ? '/api'
-  : `${envApiUrl || 'https://agrismart-3-ixo1.onrender.com'}/api`;
+  : `${envApiUrl || 'https://agrismart-active.onrender.com'}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
