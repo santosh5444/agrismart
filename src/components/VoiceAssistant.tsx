@@ -184,7 +184,7 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
 
   return (
     <>
-      <div className="fixed bottom-8 left-8 flex items-center gap-3 z-50">
+      <div className="fixed bottom-8 left-8 flex flex-row items-center gap-3 z-50">
         <button
           onClick={isListening ? stopListening : startListening}
           className={`p-6 rounded-full shadow-2xl transition-all duration-500 flex flex-col items-center gap-1 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'}`}
