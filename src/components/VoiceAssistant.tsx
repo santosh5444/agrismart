@@ -184,7 +184,17 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
 
   return (
     <>
-      <div className="fixed bottom-8 left-8 flex flex-col items-start gap-4 z-50">
+      <div className="fixed bottom-8 left-8 flex items-center gap-3 z-50">
+        <button
+          onClick={isListening ? stopListening : startListening}
+          className={`p-6 rounded-full shadow-2xl transition-all duration-500 flex flex-col items-center gap-1 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'}`}
+          style={{ boxShadow: isListening ? '0 0 60px rgba(239, 68, 68, 0.4)' : '0 0 40px rgba(34, 197, 94, 0.25)' }}
+        >
+          {isListening ? <MicOff className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white animate-pulse" />}
+          <span className="text-[8px] font-black uppercase text-white/80 tracking-widest">{isListening ? 'Stop' : 'Voice'}</span>
+          {isListening && <div className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-20" />}
+        </button>
+
         {!isListening && step === 'idle' && (
           <div className="flex gap-2 p-1.5 rounded-full bg-slate-900/80 border border-green-500/30 backdrop-blur-md animate-scale-in shadow-xl">
              {LANGUAGES.map((l) => (
@@ -198,16 +208,6 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
              ))}
           </div>
         )}
-
-        <button
-          onClick={isListening ? stopListening : startListening}
-          className={`p-6 rounded-full shadow-2xl transition-all duration-500 flex flex-col items-center gap-1 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'}`}
-          style={{ boxShadow: isListening ? '0 0 60px rgba(239, 68, 68, 0.4)' : '0 0 40px rgba(34, 197, 94, 0.25)' }}
-        >
-          {isListening ? <MicOff className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white animate-pulse" />}
-          <span className="text-[8px] font-black uppercase text-white/80 tracking-widest">{isListening ? 'Stop' : 'Voice'}</span>
-          {isListening && <div className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-20" />}
-        </button>
       </div>
 
       {showOverlay && (

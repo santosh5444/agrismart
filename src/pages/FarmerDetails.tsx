@@ -158,7 +158,7 @@ export default function FarmerDetails() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto space-y-6 animate-slide-up">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 space-y-6 animate-slide-up">
         <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#fff' } }} />
         <div className="flex items-center gap-4 mb-2"><div className="p-3 rounded-2xl glass border-green-500/30 shadow-lg"><Sprout className="w-6 h-6 text-green-400" /></div><div><h1 className="text-2xl font-black text-white">Farmer Dashboard</h1><p className="text-sm text-slate-500">Manage harvest and prices</p></div></div>
 
