@@ -84,22 +84,31 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
 
     let activeRole: 'farmer' | 'consumer' | null = null;
 
-    if (checkPath.includes('/farmer')) {
-      activeRole = 'farmer';
-    } else if (checkPath.includes('/home') || checkPath.includes('/consumer')) {
-      activeRole = 'consumer';
+    // 1. Prioritize tab-isolated sessionStorage first (survives page refreshes)
+    const sessionRole = sessionStorage.getItem('active_role') as 'farmer' | 'consumer' | null;
+    const sessionToken = sessionStorage.getItem('token');
+
+    if (sessionRole && sessionToken) {
+      activeRole = sessionRole;
     } else {
-      const sessionRole = sessionStorage.getItem('active_role') as 'farmer' | 'consumer' | null;
-      if (sessionRole) {
-        activeRole = sessionRole;
+      // 2. Fallback to path-based checks if no session exists in this tab
+      if (checkPath.includes('/farmer')) {
+        activeRole = 'farmer';
+      } else if (checkPath.includes('/home') || checkPath.includes('/consumer')) {
+        activeRole = 'consumer';
       } else {
-        const farmerToken = localStorage.getItem('persist_farmer_token');
-        const consumerToken = localStorage.getItem('persist_consumer_token');
-        console.log("[AuthStore] fallback check in localStorage. farmerToken:", !!farmerToken, "consumerToken:", !!consumerToken);
-        if (farmerToken && !consumerToken) {
-          activeRole = 'farmer';
-        } else if (consumerToken && !farmerToken) {
-          activeRole = 'consumer';
+        // 3. Fallback to localStorage check only if one role is logged in and we are not on landing page
+        // (to prevent auto-login conflicts when opening a new tab to '/')
+        const isLandingPage = checkPath === '/' || checkPath === '' || checkPath === '/#/';
+        if (!isLandingPage) {
+          const farmerToken = localStorage.getItem('persist_farmer_token');
+          const consumerToken = localStorage.getItem('persist_consumer_token');
+          console.log("[AuthStore] fallback check in localStorage. farmerToken:", !!farmerToken, "consumerToken:", !!consumerToken);
+          if (farmerToken && !consumerToken) {
+            activeRole = 'farmer';
+          } else if (consumerToken && !farmerToken) {
+            activeRole = 'consumer';
+          }
         }
       }
     }
