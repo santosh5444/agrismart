@@ -69,6 +69,11 @@ export default function HomePage() {
       }
     }
   }, [locationMode, manualDistrict, districts]);
+
+  const safeSearchResults = Array.isArray(searchResults) ? searchResults : [];
+  const safeDistricts = Array.isArray(districts) ? districts : [];
+  const safeVegetables = Array.isArray(vegetables) ? vegetables : [];
+  const safeRecommendations = Array.isArray(recommendations) ? recommendations : [];
   
   const { items, addItem, removeItem, updateQuantity, getTotal } = useCartStore();
   const { userId: currentUserId } = useAuthStore();
@@ -79,9 +84,13 @@ export default function HomePage() {
     if (deliveryMethod === 'pickup') return 0;
     let fee = 0;
     items.forEach(i => {
-      if (consumerLoc && i.lat && i.lon) {
-        const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0;
-        fee += Math.max(25, Math.floor(25 + dist * 5));
+      if (consumerLoc && typeof i.lat === 'number' && typeof i.lon === 'number') {
+        const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon);
+        if (dist !== null && !isNaN(dist)) {
+          fee += Math.max(25, Math.floor(25 + dist * 5));
+        } else {
+          fee += 35;
+        }
       } else { fee += 35; }
     });
     return fee;
@@ -303,8 +312,8 @@ export default function HomePage() {
         <div className="relative overflow-hidden rounded-3xl p-8 glass" style={{ border: '1px solid rgba(34,197,94,0.2)' }}>
           <div className="flex items-center gap-3 mb-4"><div className="p-2 bg-green-500/20 rounded-xl"><Sparkles className="w-5 h-5 text-green-400" /></div><h2 className="text-white font-black text-xl">AI Price Predictor</h2></div>
           <div className="flex flex-wrap gap-4 items-end">
-             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">Vegetable</label><select value={predVeg} onChange={e=>setPredVeg(e.target.value)} style={selectStyle}><option value="">Select...</option>{vegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
-             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">District</label><select value={predDistrict} onChange={e=>setPredDistrict(e.target.value)} style={selectStyle}><option value="">Select...</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
+             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">Vegetable</label><select value={predVeg} onChange={e=>setPredVeg(e.target.value)} style={selectStyle}><option value="">Select...</option>{safeVegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">District</label><select value={predDistrict} onChange={e=>setPredDistrict(e.target.value)} style={selectStyle}><option value="">Select...</option>{safeDistricts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
              <button onClick={handlePredict} disabled={!predVeg || !predDistrict || predLoading} className="px-8 py-3 rounded-xl font-black text-white bg-green-600 hover:bg-green-500 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50 flex items-center gap-2">
                {predLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />} Predict
              </button>
@@ -318,7 +327,7 @@ export default function HomePage() {
               <h2 className="text-lg font-black text-white mb-4 flex items-center gap-2"><Search className="w-5 h-5 text-green-400" />Find Produce</h2>
               <div className="space-y-3">
                 <input type="text" placeholder="Search..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} className="input-dark" />
-                <select value={searchDistrict} onChange={e=>setSearchDistrict(e.target.value)} style={selectStyle} className="text-sm"><option value="">All Districts</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select>
+                <select value={searchDistrict} onChange={e=>setSearchDistrict(e.target.value)} style={selectStyle} className="text-sm"><option value="">All Districts</option>{safeDistricts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select>
                 
                 <div className="border-t border-white/5 pt-3 mt-3">
                   <label className="text-[11px] font-black text-green-300 block mb-2 flex items-center gap-1">
@@ -350,7 +359,7 @@ export default function HomePage() {
                         <button 
                           type="button"
                           onClick={() => {
-                            const dist = districts.find(d => d.district === searchDistrict);
+                            const dist = safeDistricts.find(d => d.district === searchDistrict);
                             if (dist && (dist as any).latitude && (dist as any).longitude) {
                               setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
                               toast.success(`Mocking GPS at ${searchDistrict}`);
@@ -384,7 +393,7 @@ export default function HomePage() {
                         style={{ ...selectStyle, padding: '8px 12px' }} 
                         className="text-xs"
                       >
-                        {districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}
+                        {safeDistricts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}
                       </select>
                       <input 
                         type="text" 
@@ -401,8 +410,11 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="mt-5 space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                {searchResults.slice(0, 20).map((res, i) => {
-                  const distance = (consumerLoc && res.lat && res.lon) ? calculateDistance(consumerLoc.lat, consumerLoc.lon, res.lat, res.lon) : null;
+                {safeSearchResults.slice(0, 20).map((res, i) => {
+                  if (!res) return null;
+                  const distance = (consumerLoc && typeof res.lat === 'number' && !isNaN(res.lat) && typeof res.lon === 'number' && !isNaN(res.lon)) 
+                    ? calculateDistance(consumerLoc.lat, consumerLoc.lon, res.lat, res.lon) 
+                    : null;
                   return (
                     <div key={res.id || i} className="p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-green-500/30 transition-all cursor-pointer group">
                       <div className="flex justify-between items-start mb-2">
@@ -430,20 +442,23 @@ export default function HomePage() {
           </div>
           <div className="lg:col-span-3 min-h-[500px] rounded-2xl overflow-hidden glass border-green-500/20 shadow-xl relative">
             <div className="absolute top-4 left-4 z-10 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-green-500/30 text-xs font-bold text-white flex items-center gap-2 shadow-lg"><div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" /> Live Market Map</div>
-            <VegetableMap locations={searchResults as any[]} consumerLoc={consumerLoc} />
+            <VegetableMap locations={safeSearchResults as any[]} consumerLoc={consumerLoc} />
           </div>
         </div>
 
         <div>
           <div className="flex items-center gap-3 mb-6"><div className="p-2 bg-blue-500/20 rounded-xl"><TrendingDown className="w-5 h-5 text-blue-400" /></div><div><h2 className="text-2xl font-black text-white">Recommended Near You</h2><p className="text-sm text-slate-500 uppercase tracking-widest leading-none mt-1">AI picks for {userLocation}</p></div></div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {recommendations.map((rec, i) => (
-              <div key={i} className="p-5 rounded-2xl glass border-white/5 hover:border-green-500/30 transition-all card-lift">
-                <div className="flex justify-between items-start mb-4"><div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">{getEmoji(rec.vegetable)}</div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-1 uppercase"><Star className="w-2.5 h-2.5" /> AI Pick</span></div>
-                <h3 className="font-black text-white mb-1">{rec.vegetable}</h3><p className="text-[10px] text-slate-500 flex items-center gap-1 mb-4"><MapPin className="w-2.5" /> {rec.district}</p>
-                <div className="pt-3 border-t border-white/5"><p className="text-[9px] font-bold uppercase text-slate-500 mb-1">Predicted</p><p className="text-2xl font-black text-white">₹{rec.predicted_price}<span className="text-xs font-normal text-slate-500 ml-1">/kg</span></p></div>
-              </div>
-            ))}
+            {safeRecommendations.map((rec, i) => {
+              if (!rec) return null;
+              return (
+                <div key={i} className="p-5 rounded-2xl glass border-white/5 hover:border-green-500/30 transition-all card-lift">
+                  <div className="flex justify-between items-start mb-4"><div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">{getEmoji(rec.vegetable)}</div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-1 uppercase"><Star className="w-2.5 h-2.5" /> AI Pick</span></div>
+                  <h3 className="font-black text-white mb-1">{rec.vegetable}</h3><p className="text-[10px] text-slate-500 flex items-center gap-1 mb-4"><MapPin className="w-2.5" /> {rec.district}</p>
+                  <div className="pt-3 border-t border-white/5"><p className="text-[9px] font-bold uppercase text-slate-500 mb-1">Predicted</p><p className="text-2xl font-black text-white">₹{rec.predicted_price}<span className="text-xs font-normal text-slate-500 ml-1">/kg</span></p></div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

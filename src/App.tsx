@@ -5,6 +5,7 @@ import Chatbot from './components/Chatbot';
 import { Toaster } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from './store/useAuthStore';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy loaded page components to reduce initial bundle size
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -57,7 +58,8 @@ function App() {
         <Navbar />
       </header>
       <main className="flex-1">
-        <Suspense fallback={<PageLoader />}>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/farmer/login" element={<FarmerLogin />} />
@@ -89,7 +91,8 @@ function App() {
             <Route path="*" element={<Navigate to={fallbackPath} replace />} />
           </Routes>
         </Suspense>
-      </main>
+      </ErrorBoundary>
+    </main>
       <Chatbot />
       <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999999 } }} containerStyle={{ zIndex: 9999999 }} />
     </div>
