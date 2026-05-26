@@ -40,7 +40,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    initialize();
+    console.log("[App] Router path change detected. path:", location.pathname, "hash:", location.hash);
+    initialize(location.pathname);
   }, [location.pathname, location.hash, initialize]);
 
   if (!isInitialized) {

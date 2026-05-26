@@ -28,6 +28,8 @@ export default function FarmerDetails() {
   if (farmerMobile) farmerQuery.set('mobile', farmerMobile);
   const farmerCropsEndpoint = `/farmer/crops?${farmerQuery.toString()}`;
 
+  console.log("[FarmerDetails] render. farmerId:", farmerId, "farmerMobile:", farmerMobile, "endpoint:", farmerCropsEndpoint);
+
   useEffect(() => {
     const loadData = async () => {
       try {

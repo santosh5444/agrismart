@@ -12,7 +12,7 @@ interface UserState {
 interface AuthActions {
   login: (data: { userId: string; name: string; role: 'farmer' | 'consumer'; token: string; mobile?: string }) => void;
   logout: () => void;
-  initialize: () => void;
+  initialize: (routerPath?: string) => void;
   syncTab: () => void;
 }
 
@@ -73,20 +73,20 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
     set({ userId: null, name: null, role: null, token: null, mobile: null, isInitialized: true });
   },
 
-  initialize: () => {
-    // Detect active role by checking:
-    // 1. Current URL path (e.g. /farmer/... vs /home or /consumer/...)
-    // 2. sessionStorage active_role
-    // 3. Fallback: check localStorage for which credentials exist
+  initialize: (routerPath?: string) => {
     const hash = window.location.hash || '';
-    const path = window.location.pathname || '';
-    const fullPath = hash + path;
+    const winPath = window.location.pathname || '';
+    
+    // Normalize path checking. Use routerPath if available, combined with hash and pathname.
+    const checkPath = (routerPath || '') + hash + winPath;
+    
+    console.log("[AuthStore] initialize called. routerPath:", routerPath, "hash:", hash, "winPath:", winPath, "checkPath:", checkPath);
 
     let activeRole: 'farmer' | 'consumer' | null = null;
 
-    if (fullPath.includes('/farmer')) {
+    if (checkPath.includes('/farmer')) {
       activeRole = 'farmer';
-    } else if (fullPath.includes('/home') || fullPath.includes('/consumer')) {
+    } else if (checkPath.includes('/home') || checkPath.includes('/consumer')) {
       activeRole = 'consumer';
     } else {
       const sessionRole = sessionStorage.getItem('active_role') as 'farmer' | 'consumer' | null;
@@ -95,6 +95,7 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       } else {
         const farmerToken = localStorage.getItem('persist_farmer_token');
         const consumerToken = localStorage.getItem('persist_consumer_token');
+        console.log("[AuthStore] fallback check in localStorage. farmerToken:", !!farmerToken, "consumerToken:", !!consumerToken);
         if (farmerToken && !consumerToken) {
           activeRole = 'farmer';
         } else if (consumerToken && !farmerToken) {
@@ -103,8 +104,11 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       }
     }
 
+    console.log("[AuthStore] detected activeRole:", activeRole);
+
     if (activeRole === 'farmer') {
       const token = localStorage.getItem('persist_farmer_token');
+      console.log("[AuthStore] restoring farmer session. Token exists:", !!token);
       if (token) {
         sessionStorage.setItem('active_role', 'farmer');
         sessionStorage.setItem('token', token);
@@ -120,6 +124,7 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       }
     } else if (activeRole === 'consumer') {
       const token = localStorage.getItem('persist_consumer_token');
+      console.log("[AuthStore] restoring consumer session. Token exists:", !!token);
       if (token) {
         sessionStorage.setItem('active_role', 'consumer');
         sessionStorage.setItem('token', token);
@@ -135,6 +140,7 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       }
     }
 
+    console.log("[AuthStore] no active session or token missing. Clearing session.");
     // Default: not logged in or no matching role found
     set({
       userId: null,

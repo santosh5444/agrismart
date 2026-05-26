@@ -184,37 +184,37 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
 
   return (
     <>
-      <div className="fixed bottom-8 left-8 flex flex-row items-center gap-3 z-50">
+      <div className="fixed bottom-8 left-4 sm:left-8 z-50">
         <button
           onClick={isListening ? stopListening : startListening}
-          className={`p-6 rounded-full shadow-2xl transition-all duration-500 flex flex-col items-center gap-1 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'}`}
-          style={{ boxShadow: isListening ? '0 0 60px rgba(239, 68, 68, 0.4)' : '0 0 40px rgba(34, 197, 94, 0.25)' }}
+          className={`w-14 h-14 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'} animate-glow`}
+          style={{ boxShadow: isListening ? '0 0 30px rgba(239, 68, 68, 0.6)' : '0 0 20px rgba(34, 197, 94, 0.4)' }}
+          title="Voice Assistant"
         >
-          {isListening ? <MicOff className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white animate-pulse" />}
-          <span className="text-[8px] font-black uppercase text-white/80 tracking-widest">{isListening ? 'Stop' : 'Voice'}</span>
+          {isListening ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white animate-pulse" />}
           {isListening && <div className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-20" />}
         </button>
-
-        {!isListening && step === 'idle' && (
-          <div className="flex gap-2 p-1.5 rounded-full bg-slate-900/80 border border-green-500/30 backdrop-blur-md animate-scale-in shadow-xl">
-             {LANGUAGES.map((l) => (
-               <button
-                 key={l.code}
-                 onClick={() => setSelectedLang(l)}
-                 className={`w-10 h-10 rounded-full text-[10px] font-black transition-all ${selectedLang.code === l.code ? 'bg-green-500 text-white shadow-lg' : 'text-slate-400'}`}
-               >
-                 {l.label}
-               </button>
-             ))}
-          </div>
-        )}
       </div>
-
+ 
       {showOverlay && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-fade-in">
-          <div className="bg-slate-900/90 border border-green-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden text-center">
+          <div className="bg-slate-900/90 border border-green-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden text-center animate-scale-in">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent animate-shimmer" />
             <button onClick={() => { setShowOverlay(false); setStep('idle'); }} className="absolute top-4 right-4 text-slate-500 hover:text-white"><X className="w-5 h-5" /></button>
+            
+            {/* Language Selector inside overlay modal */}
+            <div className="flex justify-center gap-2 mb-6 bg-slate-950/60 p-1.5 rounded-2xl border border-white/5 w-fit mx-auto">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setSelectedLang(l)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${selectedLang.code === l.code ? 'bg-green-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {l.name}
+                </button>
+              ))}
+            </div>
+
             <div className={`p-4 rounded-full mx-auto w-fit mb-6 ${isListening ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
               {step === 'processing' ? <Loader2 className="w-12 h-12 text-green-400 animate-spin" /> : isListening ? <Mic className="w-12 h-12 text-red-500 animate-bounce" /> : <Volume2 className="w-12 h-12 text-green-400" />}
             </div>
