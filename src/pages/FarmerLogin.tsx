@@ -46,7 +46,7 @@ export default function FarmerLogin() {
             role: 'farmer',
             token: res.data.token
           });
-          localStorage.setItem('farmer_mobile', res.data.mobile || '');
+          sessionStorage.setItem('farmer_mobile', res.data.mobile || '');
           navigate('/farmer/details');
         }
       } else {

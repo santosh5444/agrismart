@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
+import { MapPin, User } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -12,9 +12,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Create custom green marker
+// Create custom green marker for farmers
 const greenIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+// Create custom blue marker for the consumer
+const blueIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -33,26 +43,36 @@ interface MapProps {
     farmer_name?: string;
     mobile?: string;
   }[];
+  consumerLoc?: { lat: number; lon: number } | null;
 }
 
-function MapUpdater({ locations }: { locations: MapProps['locations'] }) {
+function MapUpdater({ locations, consumerLoc }: { locations: MapProps['locations']; consumerLoc?: MapProps['consumerLoc'] }) {
   const map = useMap();
   
   useEffect(() => {
-    if (locations.length > 0) {
-      const bounds = L.latLngBounds(locations.map(l => [l.lat, l.lon]));
-      // Zoom in closer if there's only 1 very specific location
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: locations.length === 1 ? 14 : 10 });
+    const points: [number, number][] = [];
+    if (consumerLoc) {
+      points.push([consumerLoc.lat, consumerLoc.lon]);
+    }
+    locations.forEach(l => {
+      if (l.lat && l.lon) {
+        points.push([l.lat, l.lon]);
+      }
+    });
+
+    if (points.length > 0) {
+      const bounds = L.latLngBounds(points);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: points.length === 1 ? 14 : 12 });
     } else {
       // Reset view to Andhra Pradesh if no results
       map.setView([15.9129, 79.7400], 6);
     }
-  }, [locations, map]);
+  }, [locations, consumerLoc, map]);
 
   return null;
 }
 
-export default function VegetableMap({ locations }: MapProps) {
+export default function VegetableMap({ locations, consumerLoc }: MapProps) {
   // Center of Andhra Pradesh
   const center: [number, number] = [15.9129, 79.7400];
 
@@ -68,6 +88,20 @@ export default function VegetableMap({ locations }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        
+        {/* Render Consumer Marker if coordinates locked */}
+        {consumerLoc && (
+          <Marker position={[consumerLoc.lat, consumerLoc.lon]} icon={blueIcon}>
+            <Popup>
+              <div className="font-sans min-w-[120px] p-1">
+                <h4 className="font-black text-blue-600 flex items-center gap-1.5 text-xs"><User className="w-3.5" /> Your Location</h4>
+                <p className="text-[10px] text-gray-500 mt-1">Delivery Destination</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Render Farmer Markers */}
         {locations.map((loc, i) => (
           <Marker 
             key={`${loc.district}-${loc.vegetable}-${i}`} 
@@ -104,7 +138,19 @@ export default function VegetableMap({ locations }: MapProps) {
             </Popup>
           </Marker>
         ))}
-        <MapUpdater locations={locations} />
+
+        {/* Draw dotted line paths from consumer to visible farmers */}
+        {consumerLoc && locations.map((loc, i) => (
+          <Polyline
+            key={`route-${i}`}
+            positions={[[consumerLoc.lat, consumerLoc.lon], [loc.lat, loc.lon]]}
+            color="#2563eb"
+            dashArray="6, 8"
+            weight={2}
+          />
+        ))}
+
+        <MapUpdater locations={locations} consumerLoc={consumerLoc} />
       </MapContainer>
     </div>
   );

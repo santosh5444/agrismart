@@ -29,16 +29,7 @@ function App() {
 
   useEffect(() => {
     initialize();
-    
-    const handleStorage = (e: StorageEvent) => {
-      if (['farmer_token', 'consumer_token'].includes(e.key || '')) {
-        syncTab();
-      }
-    };
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [initialize, syncTab]);
+  }, [initialize]);
 
   const ProtectedRoute = ({ children, allowedRole }: { children: JSX.Element, allowedRole: string }) => {
     if (!currentToken) return <Navigate to="/" replace />;

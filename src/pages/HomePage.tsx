@@ -25,7 +25,7 @@ const getEmoji = (name: string) => {
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchDistrict, setSearchDistrict] = useState('');
+  const [searchDistrict, setSearchDistrict] = useState(localStorage.getItem('consumer_location') || 'Guntur');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [districts, setDistricts] = useState<{ district: string }[]>([]);
@@ -56,8 +56,8 @@ export default function HomePage() {
     items.forEach(i => {
       if (consumerLoc && i.lat && i.lon) {
         const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0;
-        fee += Math.max(10, Math.floor(5 + dist * 2));
-      } else { fee += 15; }
+        fee += Math.max(25, Math.floor(25 + dist * 5));
+      } else { fee += 35; }
     });
     return fee;
   };
@@ -69,14 +69,17 @@ export default function HomePage() {
        const req = { 
            user_id: currentUserId || 'guest',
            items: items.map(i => ({ product_id: String(i.id), farmer_id: String(i.farmer_id), quantity: Number(i.quantity), price_per_kg: Number(i.price) })),
-           delivery_type: deliveryMethod === 'delivery' ? 'home_delivery' : 'pickup'
+           delivery_type: deliveryMethod === 'delivery' ? 'home_delivery' : 'pickup',
+           consumer_lat: consumerLoc?.lat || null,
+           consumer_lon: consumerLoc?.lon || null,
+           consumer_district: userLocation
        };
        const res = await api.post('/farmer/checkout/validate', req);
        if (res.data.success) {
            setReceiptData({ id: 'RCPT-' + Math.floor(Math.random() * 1000000), date: new Date().toLocaleString(), delivery: deliveryMethod, total: getTotal() + calculateTotalDeliveryFee(), items: [...items] });
            setCheckoutStep('receipt');
        } else { toast.error(res.data.message || "Insufficient stock."); }
-    } catch (e: any) { toast.error("Server error, try again"); }
+    } catch (e: any) { toast.error(e.response?.data?.message || "Server error, try again"); }
     setIsProcessing(false);
   };
 
@@ -86,7 +89,10 @@ export default function HomePage() {
        const req = { 
            user_id: currentUserId || 'guest',
            items: items.map(i => ({ product_id: String(i.id), farmer_id: String(i.farmer_id), quantity: Number(i.quantity), price_per_kg: Number(i.price) })),
-           delivery_type: deliveryMethod === 'delivery' ? 'home_delivery' : 'pickup'
+           delivery_type: deliveryMethod === 'delivery' ? 'home_delivery' : 'pickup',
+           consumer_lat: consumerLoc?.lat || null,
+           consumer_lon: consumerLoc?.lon || null,
+           consumer_district: userLocation
        };
        const res = await api.post('/farmer/checkout/confirm', req);
        if (res.data.success) {
@@ -126,6 +132,10 @@ export default function HomePage() {
     const params = new URLSearchParams();
     if (query.trim()) params.set('name', query.trim());
     if (district.trim()) params.set('district', district.trim());
+    if (consumerLoc?.lat && consumerLoc?.lon) {
+      params.set('lat', String(consumerLoc.lat));
+      params.set('lon', String(consumerLoc.lon));
+    }
     const res = await api.get(params.toString() ? `/vegetables?${params.toString()}` : '/vegetables');
     if (requestId === latestRequestIdRef.current && res.data.success) { setSearchResults(res.data.results); }
   };
@@ -139,7 +149,11 @@ export default function HomePage() {
     };
     const fetchInitialData = async () => {
       try {
-        const [res, distRes] = await Promise.all([api.get('/vegetables'), api.get('/districts')]);
+        const initialDistrict = localStorage.getItem('consumer_location') || 'Guntur';
+        const [res, distRes] = await Promise.all([
+          api.get(`/vegetables?district=${initialDistrict}`),
+          api.get('/districts')
+        ]);
         if (res.data.success) setSearchResults(res.data.results);
         if (distRes.data.success) setDistricts(distRes.data.districts);
         const vegRes = await api.get('/vegetables-list');
@@ -163,7 +177,7 @@ export default function HomePage() {
     }, 5000);
 
     return () => { clearTimeout(delayDebounceFn); clearInterval(pollInterval); };
-  }, [searchQuery, searchDistrict]);
+  }, [searchQuery, searchDistrict, consumerLoc]);
 
   const selectStyle = { background: 'rgba(10,15,30,0.8)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '12px', padding: '12px 16px', width: '100%', outline: 'none', appearance: 'none' as const };
 
@@ -217,7 +231,27 @@ export default function HomePage() {
                       <div className="flex justify-between text-sm"><span>Subtotal</span><span>₹{getTotal()}</span></div>
                       <div className="flex justify-between text-sm"><span>Delivery</span><span className="text-green-400 font-bold">{deliveryMethod === 'delivery' ? `₹${calculateTotalDeliveryFee()}` : 'Free'}</span></div>
                       <div className="flex justify-between border-t border-white/10 pt-4 mb-4"><span className="text-lg font-black text-white">Total</span><span className="text-2xl font-black text-green-400">₹{getTotal() + calculateTotalDeliveryFee()}</span></div>
-                      <button onClick={handleProceedCheckout} disabled={isProcessing} className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue-500 disabled:opacity-50">{isProcessing ? 'Checking stock...' : 'Checkout Now'}</button>
+                      {deliveryMethod === 'delivery' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0) && (
+                        <p className="text-[10px] text-red-400 font-bold text-center mt-2">
+                          ⚠️ Some items in your basket are too far (&gt;10km) for home delivery. Please choose Self-Pickup or remove them.
+                        </p>
+                      )}
+                      {deliveryMethod === 'pickup' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 20.0) && (
+                        <p className="text-[10px] text-red-400 font-bold text-center mt-2">
+                          ⚠️ Some items in your basket are too far (&gt;20km) even for self-pickup. Please remove them.
+                        </p>
+                      )}
+                      <button 
+                        onClick={handleProceedCheckout} 
+                        disabled={
+                          isProcessing || 
+                          (deliveryMethod === 'delivery' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0)) ||
+                          (deliveryMethod === 'pickup' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 20.0))
+                        } 
+                        className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue-500 disabled:opacity-50"
+                      >
+                        {isProcessing ? 'Checking stock...' : 'Checkout Now'}
+                      </button>
                     </div>
                   )}
                 </>
@@ -260,27 +294,58 @@ export default function HomePage() {
               <div className="space-y-3">
                 <input type="text" placeholder="Search..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} className="input-dark" />
                 <select value={searchDistrict} onChange={e=>setSearchDistrict(e.target.value)} style={selectStyle} className="text-sm"><option value="">All Districts</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select>
-                <button onClick={() => { if(!navigator.geolocation) return; setLocatingConsumer(true); navigator.geolocation.getCurrentPosition(async (p)=>{setConsumerLoc({lat:p.coords.latitude,lon:p.coords.longitude});setLocatingConsumer(false);toast.success('Location locked!');try { const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`); const revData = await revRes.json(); const newDist = revData.address?.state_district || revData.address?.city || 'Guntur'; localStorage.setItem('consumer_location', newDist); } catch {} },()=>{setLocatingConsumer(false);toast.error('Failed to get location');}); }} className="w-full py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 flex items-center justify-center gap-2">
-                  {locatingConsumer ? <Loader2 className="animate-spin w-3" /> : <MapPin className="w-3" />} {consumerLoc ? '📍 Location Locked' : '🎯 Detect Location'}
-                </button>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => { if(!navigator.geolocation) return; setLocatingConsumer(true); navigator.geolocation.getCurrentPosition(async (p)=>{setConsumerLoc({lat:p.coords.latitude,lon:p.coords.longitude});setLocatingConsumer(false);toast.success('Location locked!');try { const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`); const revData = await revRes.json(); const newDist = revData.address?.state_district || revData.address?.city || 'Guntur'; localStorage.setItem('consumer_location', newDist); } catch {} },()=>{setLocatingConsumer(false);toast.error('Failed to get location');}); }} className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 flex items-center justify-center gap-1">
+                    {locatingConsumer ? <Loader2 className="animate-spin w-3" /> : <MapPin className="w-3" />} {consumerLoc ? '📍 GPS Locked' : '🎯 GPS Detect'}
+                  </button>
+                  {searchDistrict && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        const dist = districts.find(d => d.district === searchDistrict);
+                        if (dist && (dist as any).latitude && (dist as any).longitude) {
+                          setConsumerLoc({ lat: (dist as any).latitude, lon: (dist as any).longitude });
+                          toast.success(`Mocking GPS at ${searchDistrict}`);
+                        }
+                      }} 
+                      className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-green-500/10 border border-green-500/30 text-green-300 hover:bg-green-500/20 flex items-center justify-center gap-1"
+                    >
+                      🎯 Mock GPS
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="mt-5 space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                {searchResults.slice(0, 20).map((res, i) => (
-                  <div key={res.id || i} className="p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-green-500/30 transition-all cursor-pointer group">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2"><span className="text-xl">{getEmoji(res.vegetable)}</span><div><h4 className="font-bold text-white text-xs">{res.vegetable}</h4><p className="text-[10px] text-slate-500">{res.district}</p></div></div>
-                      <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Farmer</span>
+                {searchResults.slice(0, 20).map((res, i) => {
+                  const distance = (consumerLoc && res.lat && res.lon) ? calculateDistance(consumerLoc.lat, consumerLoc.lon, res.lat, res.lon) : null;
+                  return (
+                    <div key={res.id || i} className="p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-green-500/30 transition-all cursor-pointer group">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{getEmoji(res.vegetable)}</span>
+                          <div>
+                            <h4 className="font-bold text-white text-xs">{res.vegetable}</h4>
+                            <p className="text-[10px] text-slate-400">
+                              📍 {res.district} {distance !== null ? `(${distance} km)` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Farmer</span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px] mb-3">
+                        <span className="text-slate-400">Price</span>
+                        <span className="font-black text-white">₹{res.avg_price}<span className="text-[9px] font-normal text-slate-500 ml-0.5">/kg</span></span>
+                      </div>
+                      <button onClick={() => { if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: res.mobile || 'N/A', lat: res.lat, lon: res.lon }); toast.success("Added to cart!"); }} className="w-full py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100"><Plus className="w-3" /> Add to Cart</button>
                     </div>
-                    <div className="flex justify-between items-center text-[11px] mb-3"><span className="text-slate-400">Price</span><span className="font-black text-white">₹{res.avg_price}<span className="text-[9px] font-normal text-slate-500 ml-0.5">/kg</span></span></div>
-                    <button onClick={() => { if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: res.mobile || 'N/A', lat: res.lat, lon: res.lon }); toast.success("Added to cart!"); }} className="w-full py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100"><Plus className="w-3" /> Add to Cart</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
           <div className="lg:col-span-3 min-h-[500px] rounded-2xl overflow-hidden glass border-green-500/20 shadow-xl relative">
             <div className="absolute top-4 left-4 z-10 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-green-500/30 text-xs font-bold text-white flex items-center gap-2 shadow-lg"><div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" /> Live Market Map</div>
-            <VegetableMap locations={searchResults as any[]} />
+            <VegetableMap locations={searchResults as any[]} consumerLoc={consumerLoc} />
           </div>
         </div>
 

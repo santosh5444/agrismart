@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import math
 import pandas as pd
 from typing import Optional
 from fastapi import APIRouter, Query
@@ -231,3 +232,72 @@ def trigger_training():
     _state["model"] = model
     _state["encoders"] = encoders
     return {"success": True, "message": f"Model trained. MAE = ₹{mae:.2f}/kg"}
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    if lat1 is None or lon1 is None or lat2 is None or lon2 is None:
+        return None
+    try:
+        lat1, lon1, lat2, lon2 = map(float, [lat1, lon1, lat2, lon2])
+    except ValueError:
+        return None
+    R = 6371.0 # Radius of earth in km
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) ** 2 +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(dlon / 2) ** 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return round(R * c, 1)
+
+@router.get("/vegetables")
+def get_vegetables(
+    name: Optional[str] = None,
+    district: Optional[str] = None,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None
+):
+    try:
+        from .farmer_routes import _load_crops
+    except ImportError:
+        from routes.farmer_routes import _load_crops
+    
+    crops = _load_crops()
+    filtered = []
+    for c in crops:
+        # 1. Filter by name (case-insensitive partial match)
+        if name and name.strip():
+            if name.strip().lower() not in str(c.get("vegetable", "")).lower():
+                continue
+        
+        # 2. Filter by location (coordinates or district)
+        c_lat = c.get("lat")
+        c_lon = c.get("lon")
+        
+        # If user coordinates are provided, calculate distance
+        dist = None
+        if lat is not None and lon is not None and c_lat is not None and c_lon is not None:
+            dist = calculate_distance(lat, lon, c_lat, c_lon)
+            
+        # 20km limit filtering if coordinates are available
+        if lat is not None and lon is not None:
+            if dist is None or dist > 20.0:
+                continue
+        # Otherwise, filter by district if provided
+        elif district and district.strip():
+            if district.strip().lower() not in str(c.get("district", "")).lower():
+                continue
+        
+        filtered.append({
+            "id": c.get("id"),
+            "farmer_id": c.get("farmer_id"),
+            "farmer_name": c.get("name"),
+            "mobile": c.get("mobile"),
+            "vegetable": c.get("vegetable"),
+            "district": c.get("district"),
+            "lat": c_lat,
+            "lon": c_lon,
+            "avg_price": c.get("price", 0.0), # mapped to avg_price in frontend
+            "quantity": c.get("quantity", 0.0)
+        })
+        
+    return {"success": True, "results": filtered}

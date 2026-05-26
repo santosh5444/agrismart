@@ -34,6 +34,16 @@ model, encoders = None, None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Auto-seed database if empty/missing
+    try:
+        from .db_initializer import seed_db
+    except ImportError:
+        from db_initializer import seed_db
+    try:
+        seed_db()
+    except Exception as se:
+        print(f"[Startup] Database seeding failed: {se}")
+
     # Auto-train model if missing in background
     import threading
     def bg_train():
