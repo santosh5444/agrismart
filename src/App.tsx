@@ -25,11 +25,15 @@ const PageLoader = () => (
 );
 
 function App() {
-  const { role: currentRole, token: currentToken, initialize, syncTab } = useAuthStore();
+  const { role: currentRole, token: currentToken, isInitialized, initialize, syncTab } = useAuthStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  if (!isInitialized) {
+    return <PageLoader />;
+  }
 
   const ProtectedRoute = ({ children, allowedRole }: { children: JSX.Element, allowedRole: string }) => {
     if (!currentToken) return <Navigate to="/" replace />;

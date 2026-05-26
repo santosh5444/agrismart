@@ -90,7 +90,7 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
         />
         
         {/* Render Consumer Marker if coordinates locked */}
-        {consumerLoc && (
+        {consumerLoc && typeof consumerLoc.lat === 'number' && typeof consumerLoc.lon === 'number' && (
           <Marker position={[consumerLoc.lat, consumerLoc.lon]} icon={blueIcon}>
             <Popup>
               <div className="font-sans min-w-[120px] p-1">
@@ -102,55 +102,61 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
         )}
 
         {/* Render Farmer Markers */}
-        {locations.map((loc, i) => (
-          <Marker 
-            key={`${loc.district}-${loc.vegetable}-${i}`} 
-            position={[loc.lat, loc.lon]}
-            icon={greenIcon}
-          >
-            <Popup className="rounded-lg">
-              <div className="font-sans min-w-[150px]">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-bold text-lg text-agri-900 leading-tight">{loc.vegetable}</h3>
-                  {loc.type === 'Farmer' && (
-                    <span className="bg-orange-100 text-orange-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Farmer</span>
+        {locations
+          .filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')
+          .map((loc, i) => (
+            <Marker 
+              key={`${loc.district}-${loc.vegetable}-${i}`} 
+              position={[loc.lat, loc.lon]}
+              icon={greenIcon}
+            >
+              <Popup className="rounded-lg">
+                <div className="font-sans min-w-[150px]">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-bold text-lg text-agri-900 leading-tight">{loc.vegetable}</h3>
+                    {loc.type === 'Farmer' && (
+                      <span className="bg-orange-100 text-orange-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Farmer</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 flex items-center gap-1 mb-2">
+                    <MapPin className="w-3 h-3" /> {loc.district}
+                  </p>
+                  
+                  {loc.type === 'Farmer' ? (
+                    <div className="border-t border-gray-100 pt-2 space-y-1">
+                      <p className="text-[11px] text-gray-600 font-medium">Seller: {loc.farmer_name}</p>
+                      <p className="text-[11px] text-agri-600 font-bold">Call: {loc.mobile}</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-2">
+                      <span className="text-[10px] text-gray-400 uppercase font-semibold">Market Avg</span>
+                      <span className="text-base font-bold text-agri-600">₹{loc.avg_price}/kg</span>
+                    </div>
                   )}
-                </div>
-                <p className="text-xs text-gray-400 flex items-center gap-1 mb-2">
-                  <MapPin className="w-3 h-3" /> {loc.district}
-                </p>
-                
-                {loc.type === 'Farmer' ? (
-                  <div className="border-t border-gray-100 pt-2 space-y-1">
-                    <p className="text-[11px] text-gray-600 font-medium">Seller: {loc.farmer_name}</p>
-                    <p className="text-[11px] text-agri-600 font-bold">Call: {loc.mobile}</p>
+                  <div className="mt-2 text-[9px] text-gray-300 font-mono">
+                    {loc.lat.toFixed(3)}, {loc.lon.toFixed(3)}
                   </div>
-                ) : (
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-2">
-                    <span className="text-[10px] text-gray-400 uppercase font-semibold">Market Avg</span>
-                    <span className="text-base font-bold text-agri-600">₹{loc.avg_price}/kg</span>
-                  </div>
-                )}
-                <div className="mt-2 text-[9px] text-gray-300 font-mono">
-                  {loc.lat.toFixed(3)}, {loc.lon.toFixed(3)}
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          ))}
 
         {/* Draw dotted line paths from consumer to visible farmers */}
-        {consumerLoc && locations.map((loc, i) => (
-          <Polyline
-            key={`route-${i}`}
-            positions={[[consumerLoc.lat, consumerLoc.lon], [loc.lat, loc.lon]]}
-            color="#2563eb"
-            dashArray="6, 8"
-            weight={2}
-          />
-        ))}
+        {consumerLoc && typeof consumerLoc.lat === 'number' && typeof consumerLoc.lon === 'number' && 
+          locations
+            .filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')
+            .map((loc, i) => (
+              <Polyline
+                key={`route-${i}`}
+                positions={[[consumerLoc.lat, consumerLoc.lon], [loc.lat, loc.lon]]}
+                color="#2563eb"
+                dashArray="6, 8"
+                weight={2}
+              />
+            ))
+        }
 
-        <MapUpdater locations={locations} consumerLoc={consumerLoc} />
+        <MapUpdater locations={locations.filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')} consumerLoc={consumerLoc} />
       </MapContainer>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sprout, Leaf, Star, Zap, TrendingUp, ArrowRight, Sparkles, Globe, ShoppingCart } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 const VEGGIES = [
   { emoji: '🥦', color: '#22c55e' },
@@ -24,6 +25,15 @@ const STATS = [
 
 export default function LandingPage() {
   const [, setTick] = useState(0);
+  const navigate = useNavigate();
+  const { role, token } = useAuthStore();
+
+  useEffect(() => {
+    if (token) {
+      if (role === 'farmer') navigate('/farmer/details');
+      else if (role === 'consumer') navigate('/home');
+    }
+  }, [token, role, navigate]);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 80);

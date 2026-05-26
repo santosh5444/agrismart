@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Store, Mail, Lock, User, Phone, MapPin, Loader2, ArrowRight, ShoppingCart } from 'lucide-react';
@@ -11,7 +11,15 @@ export default function ConsumerLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const login = useAuthStore(state => state.login);
+  const { role, token, login } = useAuthStore();
+
+  useEffect(() => {
+    if (token && role === 'consumer') {
+      navigate('/home');
+    } else if (token && role === 'farmer') {
+      navigate('/farmer/details');
+    }
+  }, [token, role, navigate]);
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', mobile: '', location: '' });
 

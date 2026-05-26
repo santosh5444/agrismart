@@ -20,15 +20,7 @@ export default function Navbar() {
       borderBottom: '1px solid rgba(34,197,94,0.15)',
       boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(34,197,94,0.1)'
     }}>
-      {/* Animated neon top stripe */}
-      <div
-        className="h-0.5 w-full"
-        style={{
-          background: 'linear-gradient(90deg, #22c55e, #06b6d4, #a855f7, #f59e0b, #22c55e)',
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 4s linear infinite',
-        }}
-      />
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">

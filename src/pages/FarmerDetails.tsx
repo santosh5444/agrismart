@@ -158,61 +158,64 @@ export default function FarmerDetails() {
   if (fetching) return <div className="flex flex-col items-center mt-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-green-500" /><p className="text-sm text-slate-500">Loading profile...</p></div>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-slide-up">
-      <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#fff' } }} />
-      <div className="flex items-center gap-4 mb-2"><div className="p-3 rounded-2xl glass border-green-500/30 shadow-lg"><Sprout className="w-6 h-6 text-green-400" /></div><div><h1 className="text-2xl font-black text-white">Farmer Dashboard</h1><p className="text-sm text-slate-500">Manage harvest and prices</p></div></div>
+    <>
+      <div className="max-w-4xl mx-auto space-y-6 animate-slide-up">
+        <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#fff' } }} />
+        <div className="flex items-center gap-4 mb-2"><div className="p-3 rounded-2xl glass border-green-500/30 shadow-lg"><Sprout className="w-6 h-6 text-green-400" /></div><div><h1 className="text-2xl font-black text-white">Farmer Dashboard</h1><p className="text-sm text-slate-500">Manage harvest and prices</p></div></div>
 
-      <div className="rounded-3xl glass border-green-500/20 overflow-hidden shadow-2xl">
-        <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex items-center gap-3"><Plus className="w-5 text-green-400" /><h2 className="text-lg font-black text-white">Add Crop Availability</h2></div>
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="grid md:grid-cols-4 gap-5">
-            <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><MapPin className="w-4" /> District</label><select required value={formData.district} onChange={e=>setFormData({...formData, district: e.target.value})} style={selectStyle}><option value="">Select...</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
-            <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><PackageOpen className="w-4" /> Vegetable</label><select required value={formData.vegetable} onChange={e=>setFormData({...formData, vegetable: e.target.value})} style={selectStyle}><option value="">Select...</option>{vegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
-            <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><Scale className="w-4" /> Quantity (kg)</label><input type="number" required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value})} className="input-dark" /></div>
-            <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><IndianRupee className="w-4" /> Price (₹/kg)</label><input type="number" required min="1" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} className={`input-dark ${priceError ? 'border-red-500' : ''}`} /></div>
-          </div>
-          {priceError && <p className="text-[10px] text-red-400 mt-1">{priceError}</p>}
-          <button type="button" onClick={()=>setShowAdvanced(!showAdvanced)} className="mt-4 text-[10px] font-bold uppercase tracking-widest text-green-500/60 hover:text-green-400">{showAdvanced ? '− Hide Address' : '+ Add Address'}</button>
-          {showAdvanced && <div className="grid md:grid-cols-3 gap-5 mt-4 animate-scale-in">
-            <input type="text" placeholder="Street" value={formData.street} onChange={e=>setFormData({...formData, street: e.target.value})} className="input-dark" />
-            <input type="text" placeholder="City" value={formData.city} onChange={e=>setFormData({...formData, city: e.target.value})} className="input-dark" />
-            <input type="text" placeholder="Pincode" value={formData.pincode} onChange={e=>setFormData({...formData, pincode: e.target.value})} className="input-dark" />
-          </div>}
-
-          {formData.district && formData.vegetable && (
-            <div className="mt-5 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex justify-between items-center text-center">
-              <div className="text-left"><h4 className="font-bold text-white text-sm">AI Market Prediction</h4><p className="text-[10px] text-blue-200/60">Based on recent trends in {formData.district}</p></div>
-              {checkingPrice ? <Loader2 className="animate-spin text-blue-400" /> : <div className="text-2xl font-black text-blue-400">₹{predictedPrice?.toFixed(1)}<span className="text-xs ml-1">/kg</span></div>}
+        <div className="rounded-3xl glass border-green-500/20 overflow-hidden shadow-2xl">
+          <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex items-center gap-3"><Plus className="w-5 text-green-400" /><h2 className="text-lg font-black text-white">Add Crop Availability</h2></div>
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="grid md:grid-cols-4 gap-5">
+              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><MapPin className="w-4" /> District</label><select required value={formData.district} onChange={e=>setFormData({...formData, district: e.target.value})} style={selectStyle}><option value="">Select...</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
+              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><PackageOpen className="w-4" /> Vegetable</label><select required value={formData.vegetable} onChange={e=>setFormData({...formData, vegetable: e.target.value})} style={selectStyle}><option value="">Select...</option>{vegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><Scale className="w-4" /> Quantity (kg)</label><input type="number" required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value})} className="input-dark" /></div>
+              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><IndianRupee className="w-4" /> Price (₹/kg)</label><input type="number" required min="1" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} className={`input-dark ${priceError ? 'border-red-500' : ''}`} /></div>
             </div>
-          )}
+            {priceError && <p className="text-[10px] text-red-400 mt-1">{priceError}</p>}
+            <button type="button" onClick={()=>setShowAdvanced(!showAdvanced)} className="mt-4 text-[10px] font-bold uppercase tracking-widest text-green-500/60 hover:text-green-400">{showAdvanced ? '− Hide Address' : '+ Add Address'}</button>
+            {showAdvanced && <div className="grid md:grid-cols-3 gap-5 mt-4 animate-scale-in">
+              <input type="text" placeholder="Street" value={formData.street} onChange={e=>setFormData({...formData, street: e.target.value})} className="input-dark" />
+              <input type="text" placeholder="City" value={formData.city} onChange={e=>setFormData({...formData, city: e.target.value})} className="input-dark" />
+              <input type="text" placeholder="Pincode" value={formData.pincode} onChange={e=>setFormData({...formData, pincode: e.target.value})} className="input-dark" />
+            </div>}
 
-          <div className="mt-5 p-4 rounded-2xl glass border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-3"><Navigation className="w-5 text-green-400" /><div><h4 className="font-bold text-white text-sm">GPS Location</h4><p className="text-[10px] text-slate-500">{location ? 'Locked and Verified' : 'Required for consumer map'}</p></div></div>
-            <button type="button" onClick={handleGetLocation} className="px-4 py-2 rounded-xl text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">{locating ? <Loader2 className="animate-spin" /> : location ? '📍 Locked' : 'Get GPS'}</button>
-          </div>
-          <button type="submit" disabled={loading || !!priceError} className="w-full mt-6 py-4 rounded-2xl font-black text-white bg-green-600 hover:bg-green-500 shadow-xl shadow-green-600/20 disabled:opacity-50 flex items-center justify-center gap-2">{loading ? <Loader2 className="animate-spin" /> : <Plus />} List Harvest</button>
-        </form>
-      </div>
-
-      <div className="flex justify-center -my-2 mb-4"><VoiceAssistant onCommand={handleVoiceCommand} contextDistrict={formData.district || 'Guntur'} /></div>
-
-      <div className="rounded-3xl glass border-green-500/20 shadow-2xl overflow-hidden">
-        <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex justify-between items-center"><h2 className="text-lg font-black text-white flex items-center gap-2"><PackageOpen className="w-5 text-green-400" /> Your Active Listings</h2><span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-[10px] font-bold text-green-400 rounded-full">{crops.length} Listed</span></div>
-        <div className="divide-y divide-white/5">
-          {crops.length === 0 ? <div className="p-16 text-center opacity-30"><p>No crops listed.</p></div> : crops.map((c, i) => (
-            <div key={c.id || i} className="p-5 flex items-center justify-between hover:bg-white/5 transition-all">
-              <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center font-black text-green-400">{c.vegetable[0]}</div><div><h3 className="font-bold text-white text-sm">{c.vegetable}</h3><p className="text-[10px] text-slate-500">📍 {c.district}</p></div></div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex gap-2">
-                  <div className="flex border border-yellow-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-yellow-500/10 text-yellow-300">₹{c.price}/kg</span><button onClick={()=>handleUpdate(c.id, {price: c.price+1})} className="px-2 bg-yellow-500/20">+</button><button onClick={()=>handleUpdate(c.id, {price: Math.max(1, c.price-1)})} className="px-2 bg-yellow-500/20">-</button></div>
-                  <div className="flex border border-green-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-green-500/10 text-green-400">{c.quantity}kg</span><button onClick={()=>handleUpdate(c.id, {quantity: c.quantity+1})} className="px-2 bg-green-500/20">+</button><button onClick={()=>handleUpdate(c.id, {quantity: Math.max(1, c.quantity-1)})} className="px-2 bg-green-500/20">-</button></div>
-                </div>
-                <button onClick={()=>handleDelete(c.id)} className="text-[10px] text-red-400 hover:underline">Delete</button>
+            {formData.district && formData.vegetable && (
+              <div className="mt-5 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex justify-between items-center text-center">
+                <div className="text-left"><h4 className="font-bold text-white text-sm">AI Market Prediction</h4><p className="text-[10px] text-blue-200/60">Based on recent trends in {formData.district}</p></div>
+                {checkingPrice ? <Loader2 className="animate-spin text-blue-400" /> : <div className="text-2xl font-black text-blue-400">₹{predictedPrice?.toFixed(1)}<span className="text-xs ml-1">/kg</span></div>}
               </div>
-            </div>
-          ))}
+            )}
+
+            {formData.district && formData.vegetable && (
+              <div className="mt-5 p-4 rounded-2xl glass border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-3"><Navigation className="w-5 text-green-400" /><div><h4 className="font-bold text-white text-sm">GPS Location</h4><p className="text-[10px] text-slate-500">{location ? 'Locked and Verified' : 'Required for consumer map'}</p></div></div>
+                <button type="button" onClick={handleGetLocation} className="px-4 py-2 rounded-xl text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">{locating ? <Loader2 className="animate-spin" /> : location ? '📍 Locked' : 'Get GPS'}</button>
+              </div>
+            )}
+            <button type="submit" disabled={loading || !!priceError} className="w-full mt-6 py-4 rounded-2xl font-black text-white bg-green-600 hover:bg-green-500 shadow-xl shadow-green-600/20 disabled:opacity-50 flex items-center justify-center gap-2">{loading ? <Loader2 className="animate-spin" /> : <Plus />} List Harvest</button>
+          </form>
+        </div>
+
+        <div className="rounded-3xl glass border-green-500/20 shadow-2xl overflow-hidden">
+          <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex justify-between items-center"><h2 className="text-lg font-black text-white flex items-center gap-2"><PackageOpen className="w-5 text-green-400" /> Your Active Listings</h2><span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-[10px] font-bold text-green-400 rounded-full">{crops.length} Listed</span></div>
+          <div className="divide-y divide-white/5">
+            {crops.length === 0 ? <div className="p-16 text-center opacity-30"><p>No crops listed.</p></div> : crops.map((c, i) => (
+              <div key={c.id || i} className="p-5 flex items-center justify-between hover:bg-white/5 transition-all">
+                <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center font-black text-green-400">{c.vegetable[0]}</div><div><h3 className="font-bold text-white text-sm">{c.vegetable}</h3><p className="text-[10px] text-slate-500">📍 {c.district}</p></div></div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex gap-2">
+                    <div className="flex border border-yellow-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-yellow-500/10 text-yellow-300">₹{c.price}/kg</span><button onClick={()=>handleUpdate(c.id, {price: c.price+1})} className="px-2 bg-yellow-500/20">+</button><button onClick={()=>handleUpdate(c.id, {price: Math.max(1, c.price-1)})} className="px-2 bg-yellow-500/20">-</button></div>
+                    <div className="flex border border-green-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-green-500/10 text-green-400">{c.quantity}kg</span><button onClick={()=>handleUpdate(c.id, {quantity: c.quantity+1})} className="px-2 bg-green-500/20">+</button><button onClick={()=>handleUpdate(c.id, {quantity: Math.max(1, c.quantity-1)})} className="px-2 bg-green-500/20">-</button></div>
+                  </div>
+                  <button onClick={()=>handleDelete(c.id)} className="text-[10px] text-red-400 hover:underline">Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+      <VoiceAssistant onCommand={handleVoiceCommand} contextDistrict={formData.district || 'Guntur'} />
+    </>
   );
 }

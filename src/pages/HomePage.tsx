@@ -44,6 +44,31 @@ export default function HomePage() {
   const [receiptData, setReceiptData] = useState<any>(null);
   const [consumerLoc, setConsumerLoc] = useState<{lat: number, lon: number} | null>(null);
   const [locatingConsumer, setLocatingConsumer] = useState(false);
+
+  const [locationMode, setLocationMode] = useState<'gps' | 'manual'>(
+    (localStorage.getItem('consumer_loc_mode') as 'gps' | 'manual') || 'gps'
+  );
+  const [manualStreet, setManualStreet] = useState(localStorage.getItem('consumer_street') || '');
+  const [manualCity, setManualCity] = useState(localStorage.getItem('consumer_city') || '');
+  const [manualDistrict, setManualDistrict] = useState(localStorage.getItem('consumer_district') || 'Guntur');
+  const [manualPincode, setManualPincode] = useState(localStorage.getItem('consumer_pincode') || '');
+
+  useEffect(() => {
+    localStorage.setItem('consumer_loc_mode', locationMode);
+    localStorage.setItem('consumer_street', manualStreet);
+    localStorage.setItem('consumer_city', manualCity);
+    localStorage.setItem('consumer_district', manualDistrict);
+    localStorage.setItem('consumer_pincode', manualPincode);
+  }, [locationMode, manualStreet, manualCity, manualDistrict, manualPincode]);
+
+  useEffect(() => {
+    if (locationMode === 'manual') {
+      const dist = districts.find(d => d.district.toLowerCase() === manualDistrict.toLowerCase());
+      if (dist && (dist as any).latitude && (dist as any).longitude) {
+        setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
+      }
+    }
+  }, [locationMode, manualDistrict, districts]);
   
   const { items, addItem, removeItem, updateQuantity, getTotal } = useCartStore();
   const { userId: currentUserId } = useAuthStore();
@@ -125,7 +150,7 @@ export default function HomePage() {
     } catch (err) { console.error(err); } finally { setPredLoading(false); }
   };
 
-  const userLocation = localStorage.getItem('consumer_location') || 'Guntur';
+  const userLocation = locationMode === 'manual' ? manualDistrict : (localStorage.getItem('consumer_location') || 'Guntur');
 
   const fetchVegetables = async (query: string, district: string) => {
     const requestId = ++latestRequestIdRef.current;
@@ -294,24 +319,84 @@ export default function HomePage() {
               <div className="space-y-3">
                 <input type="text" placeholder="Search..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} className="input-dark" />
                 <select value={searchDistrict} onChange={e=>setSearchDistrict(e.target.value)} style={selectStyle} className="text-sm"><option value="">All Districts</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => { if(!navigator.geolocation) return; setLocatingConsumer(true); navigator.geolocation.getCurrentPosition(async (p)=>{setConsumerLoc({lat:p.coords.latitude,lon:p.coords.longitude});setLocatingConsumer(false);toast.success('Location locked!');try { const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`); const revData = await revRes.json(); const newDist = revData.address?.state_district || revData.address?.city || 'Guntur'; localStorage.setItem('consumer_location', newDist); } catch {} },()=>{setLocatingConsumer(false);toast.error('Failed to get location');}); }} className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 flex items-center justify-center gap-1">
-                    {locatingConsumer ? <Loader2 className="animate-spin w-3" /> : <MapPin className="w-3" />} {consumerLoc ? '📍 GPS Locked' : '🎯 GPS Detect'}
-                  </button>
-                  {searchDistrict && (
+                
+                <div className="border-t border-white/5 pt-3 mt-3">
+                  <label className="text-[11px] font-black text-green-300 block mb-2 flex items-center gap-1">
+                    📍 Location Mode
+                  </label>
+                  <div className="flex p-1 rounded-xl mb-3 bg-slate-900/60 border border-white/5">
                     <button 
-                      type="button"
-                      onClick={() => {
-                        const dist = districts.find(d => d.district === searchDistrict);
-                        if (dist && (dist as any).latitude && (dist as any).longitude) {
-                          setConsumerLoc({ lat: (dist as any).latitude, lon: (dist as any).longitude });
-                          toast.success(`Mocking GPS at ${searchDistrict}`);
-                        }
-                      }} 
-                      className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-green-500/10 border border-green-500/30 text-green-300 hover:bg-green-500/20 flex items-center justify-center gap-1"
+                      type="button" 
+                      onClick={() => setLocationMode('gps')} 
+                      className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${locationMode === 'gps' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}
                     >
-                      🎯 Mock GPS
+                      Auto GPS
                     </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setLocationMode('manual')} 
+                      className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${locationMode === 'manual' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}
+                    >
+                      Manual Address
+                    </button>
+                  </div>
+
+                  {locationMode === 'gps' ? (
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => { if(!navigator.geolocation) return; setLocatingConsumer(true); navigator.geolocation.getCurrentPosition(async (p)=>{setConsumerLoc({lat:p.coords.latitude,lon:p.coords.longitude});setLocatingConsumer(false);toast.success('Location locked!');try { const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.coords.latitude}&lon=${p.coords.longitude}`); const revData = await revRes.json(); const newDist = revData.address?.state_district || revData.address?.city || 'Guntur'; localStorage.setItem('consumer_location', newDist); } catch {} },()=>{setLocatingConsumer(false);toast.error('Failed to get location');}); }} className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 flex items-center justify-center gap-1">
+                        {locatingConsumer ? <Loader2 className="animate-spin w-3" /> : <MapPin className="w-3" />} {consumerLoc ? '📍 GPS Locked' : '🎯 GPS Detect'}
+                      </button>
+                      {searchDistrict && (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const dist = districts.find(d => d.district === searchDistrict);
+                            if (dist && (dist as any).latitude && (dist as any).longitude) {
+                              setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
+                              toast.success(`Mocking GPS at ${searchDistrict}`);
+                            }
+                          }} 
+                          className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase transition-all bg-green-500/10 border border-green-500/30 text-green-300 hover:bg-green-500/20 flex items-center justify-center gap-1"
+                        >
+                          🎯 Mock GPS
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5 animate-scale-in">
+                      <input 
+                        type="text" 
+                        placeholder="Street / House No." 
+                        value={manualStreet} 
+                        onChange={e => setManualStreet(e.target.value)} 
+                        className="input-dark text-xs py-2 px-3" 
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="City / Town" 
+                        value={manualCity} 
+                        onChange={e => setManualCity(e.target.value)} 
+                        className="input-dark text-xs py-2 px-3" 
+                      />
+                      <select 
+                        value={manualDistrict} 
+                        onChange={e => setManualDistrict(e.target.value)} 
+                        style={{ ...selectStyle, padding: '8px 12px' }} 
+                        className="text-xs"
+                      >
+                        {districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}
+                      </select>
+                      <input 
+                        type="text" 
+                        placeholder="Pincode" 
+                        value={manualPincode} 
+                        onChange={e => setManualPincode(e.target.value)} 
+                        className="input-dark text-xs py-2 px-3" 
+                      />
+                      <div className="text-[10px] text-blue-300 font-medium px-1 mt-1">
+                        📍 Distance calculated from {manualDistrict} center
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
