@@ -9,8 +9,10 @@ try:
 except ImportError:
     from auth import hash_password
 
-USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
-CROPS_FILE = os.path.join(os.path.dirname(__file__), "crops.json")
+try:
+    from .db_helper import db_load, db_save
+except ImportError:
+    from db_helper import db_load, db_save
 
 # 12 Districts from districts_dataset.csv
 DISTRICTS_DATA = [
@@ -57,17 +59,10 @@ VILLAGES = ["Mamidipudi", "Rayapudi", "Penugonda", "Karakambadi", "Puttur", "Nan
 def seed_db():
     print("[Seeder] Checking database files...")
     
-    # 1. Load or initialize users.json
+    # 1. Load or initialize users
+    users = db_load("users", {"farmers": {}, "consumers": {}})
     users_modified = False
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, "r") as f:
-                users = json.load(f)
-        except Exception:
-            users = {"farmers": {}, "consumers": {}}
-    else:
-        users = {"farmers": {}, "consumers": {}}
-
+ 
     if not users.get("farmers"):
         print("[Seeder] Seeding default farmers...")
         hashed_pwd = hash_password("password123")
@@ -87,7 +82,7 @@ def seed_db():
                 "crops": []
             }
         users_modified = True
-
+ 
     if not users.get("consumers"):
         print("[Seeder] Seeding default consumer...")
         hashed_pwd = hash_password("password123")
@@ -100,30 +95,16 @@ def seed_db():
             "location": "Guntur"
         }
         users_modified = True
-
+ 
     if users_modified:
-        os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
-        with open(USERS_FILE, "w") as f:
-            json.dump(users, f, indent=2)
-        print("[Seeder] users.json seeded successfully.")
+        db_save("users", users)
+        print("[Seeder] users seeded successfully.")
     else:
-        print("[Seeder] users.json already populated.")
-
-    # Reload users to get the mapping of farmer email to ID/name/mobile
-    with open(USERS_FILE, "r") as f:
-        users = json.load(f)
-
-    # 2. Load or initialize crops.json
-    crops_modified = False
-    if os.path.exists(CROPS_FILE):
-        try:
-            with open(CROPS_FILE, "r") as f:
-                crops = json.load(f)
-        except Exception:
-            crops = []
-    else:
-        crops = []
-
+        print("[Seeder] users already populated.")
+ 
+    # 2. Load or initialize crops
+    crops = db_load("crops", [])
+ 
     if not crops:
         print("[Seeder] Seeding default crops...")
         
@@ -162,8 +143,7 @@ def seed_db():
                     "lon": round(dist["lon"] + lon_offset, 5)
                 })
         
-        with open(CROPS_FILE, "w") as f:
-            json.dump(crops, f, indent=2)
-        print("[Seeder] crops.json seeded successfully.")
+        db_save("crops", crops)
+        print("[Seeder] crops seeded successfully.")
     else:
-        print("[Seeder] crops.json already populated.")
+        print("[Seeder] crops already populated.")

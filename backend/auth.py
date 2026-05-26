@@ -19,37 +19,21 @@ BCRYPT_ROUNDS = 10  # Optimized for performance
 
 USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
 
-# ── In-memory User Cache ──────────────────────────────────────────────────
-_user_store_cache = None
-_last_load_time = 0
-CACHE_TTL = 300  # 5 min
-
+# ── Database helper integration ──────────────────────────────────────────
 def _load_users(force: bool = False) -> Dict[str, Dict[str, Dict[str, Any]]]:
-    global _user_store_cache, _last_load_time
-    now = time.time()
-    if force or _user_store_cache is None or (now - _last_load_time > CACHE_TTL):
-        if os.path.exists(USERS_FILE):
-            try:
-                with open(USERS_FILE, "r") as f:
-                    _user_store_cache = json.load(f)
-            except:
-                _user_store_cache = {"farmers": {}, "consumers": {}}
-        else:
-            _user_store_cache = {"farmers": {}, "consumers": {}}
-        _last_load_time = now
-    return _user_store_cache
+    try:
+        from .db_helper import db_load
+    except ImportError:
+        from db_helper import db_load
+    return db_load("users", {"farmers": {}, "consumers": {}})
 
 def _save_users(data: Dict[str, Dict[str, Dict[str, Any]]]):
-    global _user_store_cache, _last_load_time
     try:
-        os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
-        with open(USERS_FILE, "w") as f:
-            json.dump(data, f, indent=2)
-        _user_store_cache = data
-        _last_load_time = time.time()
-    except Exception as e:
-        print(f"[Auth] WARNING: Could not save users.json: {e}")
-        raise RuntimeError(f"User data could not be persisted: {e}")
+        from .db_helper import db_save
+    except ImportError:
+        from db_helper import db_save
+    db_save("users", data)
+
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)

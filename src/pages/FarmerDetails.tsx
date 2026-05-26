@@ -160,11 +160,11 @@ export default function FarmerDetails() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 space-y-6 animate-slide-up">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 space-y-6">
         <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#fff' } }} />
-        <div className="flex items-center gap-4 mb-2"><div className="p-3 rounded-2xl glass border-green-500/30 shadow-lg"><Sprout className="w-6 h-6 text-green-400" /></div><div><h1 className="text-2xl font-black text-white">Farmer Dashboard</h1><p className="text-sm text-slate-500">Manage harvest and prices</p></div></div>
+        <div className="flex items-center gap-4 mb-2 animate-slide-up"><div className="p-3 rounded-2xl glass border-green-500/30 shadow-lg"><Sprout className="w-6 h-6 text-green-400" /></div><div><h1 className="text-2xl font-black text-white">Farmer Dashboard</h1><p className="text-sm text-slate-500">Manage harvest and prices</p></div></div>
 
-        <div className="rounded-3xl glass border-green-500/20 overflow-hidden shadow-2xl">
+        <div className="rounded-3xl glass border-green-500/20 overflow-hidden shadow-2xl animate-slide-up" style={{ animationDelay: '100ms' }}>
           <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex items-center gap-3"><Plus className="w-5 text-green-400" /><h2 className="text-lg font-black text-white">Add Crop Availability</h2></div>
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid md:grid-cols-4 gap-5">
@@ -198,7 +198,7 @@ export default function FarmerDetails() {
           </form>
         </div>
 
-        <div className="rounded-3xl glass border-green-500/20 shadow-2xl overflow-hidden">
+        <div className="rounded-3xl glass border-green-500/20 shadow-2xl overflow-hidden animate-slide-up" style={{ animationDelay: '200ms' }}>
           <div className="p-6 bg-green-500/5 border-b border-green-500/10 flex justify-between items-center"><h2 className="text-lg font-black text-white flex items-center gap-2"><PackageOpen className="w-5 text-green-400" /> Your Active Listings</h2><span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-[10px] font-bold text-green-400 rounded-full">{crops.length} Listed</span></div>
           <div className="divide-y divide-white/5">
             {crops.length === 0 ? <div className="p-16 text-center opacity-30"><p>No crops listed.</p></div> : crops.map((c, i) => (

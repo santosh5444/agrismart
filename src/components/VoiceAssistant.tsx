@@ -184,22 +184,38 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
 
   return (
     <>
-      <div className="fixed bottom-8 left-4 sm:left-8 z-50">
+      <div className="fixed bottom-8 left-4 sm:left-8 flex flex-row items-center gap-3 z-50 animate-scale-in">
         <button
           onClick={isListening ? stopListening : startListening}
-          className={`w-14 h-14 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'} animate-glow`}
+          className={`w-14 h-14 rounded-full shadow-2xl transition-all duration-300 flex flex-col items-center justify-center gap-0.5 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'} animate-glow`}
           style={{ boxShadow: isListening ? '0 0 30px rgba(239, 68, 68, 0.6)' : '0 0 20px rgba(34, 197, 94, 0.4)' }}
           title="Voice Assistant"
         >
-          {isListening ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white animate-pulse" />}
+          {isListening ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white animate-pulse" />}
+          <span className="text-[8px] font-black uppercase text-white/90 tracking-wider">
+            {isListening ? 'Stop' : 'Voice'}
+          </span>
           {isListening && <div className="absolute inset-0 rounded-full animate-ping bg-red-400 opacity-20" />}
         </button>
+
+        {!isListening && step === 'idle' && (
+          <div className="flex gap-1.5 p-1.5 rounded-full bg-slate-900/90 border border-green-500/20 backdrop-blur-md shadow-xl animate-scale-in">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => setSelectedLang(l)}
+                className={`w-8 h-8 rounded-full text-[9px] font-black transition-all ${selectedLang.code === l.code ? 'bg-green-500 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
  
       {showOverlay && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-fade-in">
           <div className="bg-slate-900/90 border border-green-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl relative overflow-hidden text-center animate-scale-in">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent animate-shimmer" />
             <button onClick={() => { setShowOverlay(false); setStep('idle'); }} className="absolute top-4 right-4 text-slate-500 hover:text-white"><X className="w-5 h-5" /></button>
             
             {/* Language Selector inside overlay modal */}
