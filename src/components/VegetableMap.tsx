@@ -51,18 +51,28 @@ function MapUpdater({ locations, consumerLoc }: { locations: MapProps['locations
   
   useEffect(() => {
     const points: [number, number][] = [];
-    if (consumerLoc) {
+    if (consumerLoc && 
+        typeof consumerLoc.lat === 'number' && !isNaN(consumerLoc.lat) && 
+        typeof consumerLoc.lon === 'number' && !isNaN(consumerLoc.lon)) {
       points.push([consumerLoc.lat, consumerLoc.lon]);
     }
-    locations.forEach(l => {
-      if (l.lat && l.lon) {
+    
+    const safeLocs = Array.isArray(locations) ? locations : [];
+    safeLocs.forEach(l => {
+      if (l && 
+          typeof l.lat === 'number' && !isNaN(l.lat) && 
+          typeof l.lon === 'number' && !isNaN(l.lon)) {
         points.push([l.lat, l.lon]);
       }
     });
 
     if (points.length > 0) {
-      const bounds = L.latLngBounds(points);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: points.length === 1 ? 14 : 12 });
+      try {
+        const bounds = L.latLngBounds(points);
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: points.length === 1 ? 14 : 12 });
+      } catch (err) {
+        console.error("Leaflet fitBounds crash avoided:", err);
+      }
     } else {
       // Reset view to Andhra Pradesh if no results
       map.setView([15.9129, 79.7400], 6);
@@ -72,9 +82,10 @@ function MapUpdater({ locations, consumerLoc }: { locations: MapProps['locations
   return null;
 }
 
-export default function VegetableMap({ locations, consumerLoc }: MapProps) {
+export default function VegetableMap({ locations = [], consumerLoc }: MapProps) {
   // Center of Andhra Pradesh
   const center: [number, number] = [15.9129, 79.7400];
+  const safeLocations = Array.isArray(locations) ? locations : [];
 
   return (
     <div className="h-[400px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner" style={{isolation: 'isolate'}}>
@@ -90,7 +101,9 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
         />
         
         {/* Render Consumer Marker if coordinates locked */}
-        {consumerLoc && typeof consumerLoc.lat === 'number' && typeof consumerLoc.lon === 'number' && (
+        {consumerLoc && 
+         typeof consumerLoc.lat === 'number' && !isNaN(consumerLoc.lat) && 
+         typeof consumerLoc.lon === 'number' && !isNaN(consumerLoc.lon) && (
           <Marker position={[consumerLoc.lat, consumerLoc.lon]} icon={blueIcon}>
             <Popup>
               <div className="font-sans min-w-[120px] p-1">
@@ -102,8 +115,8 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
         )}
 
         {/* Render Farmer Markers */}
-        {locations
-          .filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')
+        {safeLocations
+          .filter(loc => loc && typeof loc.lat === 'number' && !isNaN(loc.lat) && typeof loc.lon === 'number' && !isNaN(loc.lon))
           .map((loc, i) => (
             <Marker 
               key={`${loc.district}-${loc.vegetable}-${i}`} 
@@ -142,9 +155,11 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
           ))}
 
         {/* Draw dotted line paths from consumer to visible farmers */}
-        {consumerLoc && typeof consumerLoc.lat === 'number' && typeof consumerLoc.lon === 'number' && 
-          locations
-            .filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')
+        {consumerLoc && 
+         typeof consumerLoc.lat === 'number' && !isNaN(consumerLoc.lat) && 
+         typeof consumerLoc.lon === 'number' && !isNaN(consumerLoc.lon) && 
+          safeLocations
+            .filter(loc => loc && typeof loc.lat === 'number' && !isNaN(loc.lat) && typeof loc.lon === 'number' && !isNaN(loc.lon))
             .map((loc, i) => (
               <Polyline
                 key={`route-${i}`}
@@ -156,7 +171,10 @@ export default function VegetableMap({ locations, consumerLoc }: MapProps) {
             ))
         }
 
-        <MapUpdater locations={locations.filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lon === 'number')} consumerLoc={consumerLoc} />
+        <MapUpdater 
+          locations={safeLocations.filter(loc => loc && typeof loc.lat === 'number' && !isNaN(loc.lat) && typeof loc.lon === 'number' && !isNaN(loc.lon))} 
+          consumerLoc={consumerLoc} 
+        />
       </MapContainer>
     </div>
   );

@@ -28,6 +28,14 @@ function App() {
   const { role: currentRole, token: currentToken, isInitialized, initialize, syncTab } = useAuthStore();
 
   useEffect(() => {
+    // Migration: Clear old localStorage auth keys to prevent session leakage from old builds
+    const legacyKeys = [
+      'farmer_token', 'farmer_role', 'farmer_name', 'farmer_userId', 'farmer_mobile',
+      'consumer_token', 'consumer_role', 'consumer_name', 'consumer_userId', 'consumer_mobile', 'consumer_location',
+      'token'
+    ];
+    legacyKeys.forEach(k => localStorage.removeItem(k));
+
     initialize();
   }, [initialize]);
 
