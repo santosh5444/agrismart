@@ -22,8 +22,7 @@ export default function FarmerDetails() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const navigate = useNavigate();
 
-  const { userId: farmerId, name: farmerName } = useAuthStore();
-  const farmerMobile = sessionStorage.getItem('farmer_mobile') || '';
+  const { userId: farmerId, name: farmerName, mobile: farmerMobile } = useAuthStore();
   const farmerQuery = new URLSearchParams();
   if (farmerId) farmerQuery.set('farmer_id', farmerId);
   if (farmerMobile) farmerQuery.set('mobile', farmerMobile);

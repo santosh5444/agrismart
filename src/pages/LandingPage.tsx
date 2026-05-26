@@ -83,7 +83,7 @@ export default function LandingPage() {
 
         {/* Animated badge */}
         <div
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-8 text-sm font-bold shimmer-line"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full mb-8 text-sm font-bold"
           style={{
             background: 'rgba(34,197,94,0.1)',
             border: '1px solid rgba(34,197,94,0.3)',

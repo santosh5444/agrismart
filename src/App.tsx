@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Chatbot from './components/Chatbot';
 import { Toaster } from 'react-hot-toast';
@@ -26,7 +26,8 @@ const PageLoader = () => (
 );
 
 function App() {
-  const { role: currentRole, token: currentToken, isInitialized, initialize, syncTab } = useAuthStore();
+  const { role: currentRole, token: currentToken, isInitialized, initialize } = useAuthStore();
+  const location = useLocation();
 
   useEffect(() => {
     // Migration: Clear old localStorage auth keys to prevent session leakage from old builds
@@ -36,9 +37,11 @@ function App() {
       'token'
     ];
     legacyKeys.forEach(k => localStorage.removeItem(k));
+  }, []);
 
+  useEffect(() => {
     initialize();
-  }, [initialize]);
+  }, [location.pathname, location.hash, initialize]);
 
   if (!isInitialized) {
     return <PageLoader />;

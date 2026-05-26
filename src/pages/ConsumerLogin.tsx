@@ -52,7 +52,8 @@ export default function ConsumerLogin() {
             userId: res.data.consumer_id,
             name: res.data.name || 'Consumer',
             role: 'consumer',
-            token: res.data.token
+            token: res.data.token,
+            mobile: res.data.mobile || ''
           });
           navigate('/home');
         }

@@ -52,9 +52,9 @@ export default function FarmerLogin() {
             userId: res.data.farmer_id,
             name: res.data.name || 'Farmer',
             role: 'farmer',
-            token: res.data.token
+            token: res.data.token,
+            mobile: res.data.mobile || ''
           });
-          sessionStorage.setItem('farmer_mobile', res.data.mobile || '');
           navigate('/farmer/details');
         }
       } else {
