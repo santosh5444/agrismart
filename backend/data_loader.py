@@ -70,6 +70,90 @@ production_df = production_df.merge(
     how="left",
 )
 
+# ── Augment missing vegetables with synthetic historical data ──────────────
+ALL_VEGETABLES_MAP = {
+    "Tomato": 45.0,
+    "Onion": 40.0,
+    "Potato": 30.0,
+    "Green Chilli": 55.0,
+    "Brinjal": 30.0,
+    "Okra": 40.0,
+    "Cabbage": 25.0,
+    "Cauliflower": 40.0,
+    "Spinach": 25.0,
+    "Bottle Gourd": 22.0,
+    "Capsicum": 50.0,
+    "Cucumber": 25.0,
+    "Peas": 60.0,
+    "Beans": 45.0,
+    "Radish": 25.0,
+    "Ginger": 100.0
+}
+
+existing_vegs = prices_df["vegetable"].unique()
+missing_vegs = [v for v in ALL_VEGETABLES_MAP if v not in existing_vegs]
+
+if missing_vegs:
+    print(f"[DataLoader] Augmenting prices and production with missing vegetables: {missing_vegs}")
+    unique_dates = prices_df["date_updated"].unique()
+    unique_districts = districts_df.to_dict("records")
+    
+    synth_prices = []
+    np.random.seed(42)
+    
+    for veg in missing_vegs:
+        base_price = ALL_VEGETABLES_MAP[veg]
+        for dist in unique_districts:
+            df_temp = pd.DataFrame({
+                "district_id": dist["district_id"],
+                "district": dist["district"],
+                "latitude": dist["latitude"],
+                "longitude": dist["longitude"],
+                "vegetable": veg,
+                "date_updated": unique_dates
+            })
+            
+            dates = pd.to_datetime(df_temp["date_updated"])
+            months = dates.dt.month
+            years = dates.dt.year
+            
+            # Seasonal variation (15% amplitude)
+            seasonal_effect = np.sin(2 * np.pi * months / 12) * (base_price * 0.15)
+            # Inflation trend (4% per year after 2023)
+            trend_effect = (years - 2023) * (base_price * 0.04)
+            # District price variation (2% per district offset from average)
+            dist_effect = (dist["district_id"] - 6.5) * (base_price * 0.02)
+            # Noise (5% standard deviation)
+            noise = np.random.normal(0, base_price * 0.05, size=len(unique_dates))
+            
+            prices = base_price + seasonal_effect + trend_effect + dist_effect + noise
+            df_temp["price_per_kg_inr"] = np.clip(prices, base_price * 0.4, base_price * 2.0).round(2)
+            synth_prices.append(df_temp)
+            
+    if synth_prices:
+        prices_df = pd.concat([prices_df, pd.concat(synth_prices, ignore_index=True)], ignore_index=True)
+
+    synth_prod = []
+    for veg in missing_vegs:
+        for dist in unique_districts:
+            avg_yield = np.random.uniform(12.0, 28.0)
+            avg_area = np.random.uniform(800.0, 4500.0)
+            for year in [2023, 2024, 2025]:
+                synth_prod.append({
+                    "district_id": dist["district_id"],
+                    "district": dist["district"],
+                    "latitude": dist["latitude"],
+                    "longitude": dist["longitude"],
+                    "vegetable": veg,
+                    "yield_tons_per_hectare": round(avg_yield + np.random.normal(0, 1.5), 2),
+                    "area_hectares": round(avg_area + np.random.normal(0, 100), 1),
+                    "production_tons": round(avg_yield * avg_area, 1),
+                    "year": year
+                })
+    if synth_prod:
+        production_df = pd.concat([production_df, pd.DataFrame(synth_prod)], ignore_index=True)
+
+
 # ── Build an enriched vegetable-location table ─────────────────────────────
 # One row per (vegetable, district) with avg price, lat/lon, production stats
 price_agg = (

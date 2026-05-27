@@ -88,11 +88,25 @@ def load_model():
 def predict_price(model, encoders, vegetable: str, district: str, month: int, year: int, avg_yield: float = 20.0, avg_area: float = 2000.0) -> float:
     veg_enc = encoders["vegetable"]
     dist_enc = encoders["district"]
+    
+    # Case-insensitive robust lookup in LabelEncoder classes
+    veg_match = vegetable
+    for c in veg_enc.classes_:
+        if str(c).lower() == vegetable.lower():
+            veg_match = str(c)
+            break
+            
+    dist_match = district
+    for c in dist_enc.classes_:
+        if str(c).lower() == district.lower():
+            dist_match = str(c)
+            break
+
     try:
-        v = veg_enc.transform([vegetable])[0]
+        v = veg_enc.transform([veg_match])[0]
     except: v = 0
     try:
-        d = dist_enc.transform([district])[0]
+        d = dist_enc.transform([dist_match])[0]
     except: d = 0
     X = np.array([[v, d, month, year, avg_yield, avg_area]])
     price = model.predict(X)[0]
