@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useCartStore } from './useCartStore';
 
 interface UserState {
   userId: string | null;
@@ -27,6 +28,20 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
   login: (data) => {
     const { userId, name, role, token, mobile } = data;
     
+    // Clear any existing customer location data and cart to prevent cross-session pollution
+    if (role === 'consumer') {
+      const keys = [
+        'consumer_location', 'consumer_loc_mode', 'consumer_street', 
+        'consumer_city', 'consumer_district', 'consumer_pincode'
+      ];
+      keys.forEach(k => localStorage.removeItem(k));
+      try {
+        useCartStore.getState().clearCart();
+      } catch (err) {
+        console.error("[AuthStore] Failed to clear cart on login:", err);
+      }
+    }
+
     // Persist role-specific credentials in localStorage
     const prefix = role === 'farmer' ? 'persist_farmer_' : 'persist_consumer_';
     localStorage.setItem(`${prefix}token`, token);
@@ -78,6 +93,20 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
         'persist_consumer_token', 'persist_consumer_role', 'persist_consumer_name', 'persist_consumer_userId', 'persist_consumer_mobile'
       ];
       keys.forEach(k => localStorage.removeItem(k));
+    }
+
+    // Clear all consumer location keys from localStorage on logout
+    const consumerKeys = [
+      'consumer_location', 'consumer_loc_mode', 'consumer_street', 
+      'consumer_city', 'consumer_district', 'consumer_pincode'
+    ];
+    consumerKeys.forEach(k => localStorage.removeItem(k));
+
+    // Clear cart via Zustand store on logout
+    try {
+      useCartStore.getState().clearCart();
+    } catch (err) {
+      console.error("[AuthStore] Failed to clear cart on logout:", err);
     }
     
     set({ userId: null, name: null, role: null, token: null, mobile: null, isInitialized: true });
