@@ -53,6 +53,9 @@ export default function HomePage() {
   const [manualDistrict, setManualDistrict] = useState(localStorage.getItem('consumer_district') || 'Guntur');
   const [manualPincode, setManualPincode] = useState(localStorage.getItem('consumer_pincode') || '');
 
+  const [geocodingStatus, setGeocodingStatus] = useState('');
+  const [resolvedAddress, setResolvedAddress] = useState('');
+
   useEffect(() => {
     localStorage.setItem('consumer_loc_mode', locationMode);
     localStorage.setItem('consumer_street', manualStreet);
@@ -62,13 +65,67 @@ export default function HomePage() {
   }, [locationMode, manualStreet, manualCity, manualDistrict, manualPincode]);
 
   useEffect(() => {
-    if (locationMode === 'manual') {
+    if (locationMode !== 'manual') {
+      setGeocodingStatus('');
+      setResolvedAddress('');
+      return;
+    }
+
+    // If address fields are completely empty, default to district center immediately
+    if (!manualStreet && !manualCity && !manualPincode) {
       const dist = districts.find(d => d.district.toLowerCase() === manualDistrict.toLowerCase());
       if (dist && (dist as any).latitude && (dist as any).longitude) {
         setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
       }
+      setResolvedAddress('');
+      setGeocodingStatus('');
+      return;
     }
-  }, [locationMode, manualDistrict, districts]);
+
+    setGeocodingStatus('Detecting exact address location...');
+    const delayDebounceFn = setTimeout(async () => {
+      const queryParts = [];
+      if (manualStreet) queryParts.push(manualStreet);
+      if (manualCity) queryParts.push(manualCity);
+      if (manualDistrict) queryParts.push(manualDistrict);
+      if (manualPincode) queryParts.push(manualPincode);
+      queryParts.push("Andhra Pradesh", "India");
+      const query = encodeURIComponent(queryParts.join(", "));
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          setConsumerLoc({ lat, lon });
+          // Shorten display name for cleaner UI presentation
+          const shortAddress = data[0].display_name.split(',').slice(0, 3).join(',');
+          setResolvedAddress(shortAddress);
+          setGeocodingStatus('');
+        } else {
+          // Fallback to district center
+          const dist = districts.find(d => d.district.toLowerCase() === manualDistrict.toLowerCase());
+          if (dist && (dist as any).latitude && (dist as any).longitude) {
+            setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
+          }
+          setResolvedAddress('');
+          setGeocodingStatus('Exact address not found, using district center');
+        }
+      } catch (err) {
+        console.error("Geocoding error:", err);
+        // Fallback to district center
+        const dist = districts.find(d => d.district.toLowerCase() === manualDistrict.toLowerCase());
+        if (dist && (dist as any).latitude && (dist as any).longitude) {
+          setConsumerLoc({ lat: Number((dist as any).latitude), lon: Number((dist as any).longitude) });
+        }
+        setResolvedAddress('');
+        setGeocodingStatus('Geocoding error, using district center');
+      }
+    }, 1200);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [locationMode, manualStreet, manualCity, manualDistrict, manualPincode, districts]);
 
   const safeSearchResults = Array.isArray(searchResults) ? searchResults : [];
   const safeDistricts = Array.isArray(districts) ? districts : [];
@@ -402,8 +459,22 @@ export default function HomePage() {
                         onChange={e => setManualPincode(e.target.value)} 
                         className="input-dark text-xs py-2 px-3" 
                       />
-                      <div className="text-[10px] text-blue-300 font-medium px-1 mt-1">
-                        📍 Distance calculated from {manualDistrict} center
+                      <div className="text-[10px] text-blue-300 font-medium px-1 mt-1 flex flex-col gap-0.5">
+                        {geocodingStatus ? (
+                          <div className="flex items-center gap-1 text-yellow-300/80">
+                            <Loader2 className="animate-spin w-2.5 h-2.5" />
+                            <span>{geocodingStatus}</span>
+                          </div>
+                        ) : resolvedAddress ? (
+                          <div className="text-green-300/90 leading-tight">
+                            <span>📍 Address locked: </span>
+                            <span className="font-semibold text-white">{resolvedAddress}</span>
+                          </div>
+                        ) : (
+                          <div className="text-blue-300/80">
+                            <span>📍 Distance calculated from {manualDistrict} center</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
