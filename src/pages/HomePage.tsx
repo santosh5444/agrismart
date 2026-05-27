@@ -140,16 +140,28 @@ export default function HomePage() {
   const calculateTotalDeliveryFee = () => {
     if (deliveryMethod === 'pickup') return 0;
     let fee = 0;
+    
+    // Group items by unique farmer_id to charge delivery fee once per farmer location
+    const uniqueFarmers = new Map<string, { lat?: number; lon?: number }>();
     items.forEach(i => {
-      if (consumerLoc && typeof i.lat === 'number' && typeof i.lon === 'number') {
-        const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon);
+      if (i.farmer_id && !uniqueFarmers.has(i.farmer_id)) {
+        uniqueFarmers.set(i.farmer_id, { lat: i.lat, lon: i.lon });
+      }
+    });
+
+    uniqueFarmers.forEach((coords) => {
+      if (consumerLoc && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
+        const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, coords.lat, coords.lon);
         if (dist !== null && !isNaN(dist)) {
           fee += Math.max(25, Math.floor(25 + dist * 5));
         } else {
           fee += 35;
         }
-      } else { fee += 35; }
+      } else {
+        fee += 35;
+      }
     });
+
     return fee;
   };
 
