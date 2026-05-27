@@ -16,7 +16,7 @@ try:
     from .routes.auth_routes import router as auth_router
     from .routes.farmer_routes import router as farmer_router
     from .routes.data_routes import router as data_router, set_state
-    from .routes.ai_routes import router as ai_router
+    from .routes.ai_routes import router as ai_router, set_state as set_ai_state
 except ImportError:
     from data_loader import (
         prices_df, production_df, vegs_df, districts_df,
@@ -28,7 +28,7 @@ except ImportError:
     from routes.auth_routes import router as auth_router
     from routes.farmer_routes import router as farmer_router
     from routes.data_routes import router as data_router, set_state
-    from routes.ai_routes import router as ai_router
+    from routes.ai_routes import router as ai_router, set_state as set_ai_state
 
 model, encoders = None, None
 
@@ -55,6 +55,9 @@ async def lifespan(app: FastAPI):
                 m, e, _ = train_model(prices_df, production_df)
             model, encoders = m, e
             set_state(model=model, encoders=encoders)
+            try:
+                set_ai_state(model=model, encoders=encoders)
+            except: pass
             print("[Startup] Background training complete.")
         except Exception as ex:
             print(f"[Startup] Background training failed: {ex}")
@@ -77,6 +80,21 @@ async def lifespan(app: FastAPI):
         DISTRICTS=DISTRICTS,
         VEGETABLES=VEGETABLES,
     )
+    # Inject state into ai_routes
+    try:
+        set_ai_state(
+            prices_df=prices_df,
+            production_df=production_df,
+            vegs_df=vegs_df,
+            model=model,
+            encoders=encoders,
+            predict_price_fn=predict_price,
+            get_recommendations_fn=get_recommendations,
+            DISTRICTS=DISTRICTS,
+            VEGETABLES=VEGETABLES,
+        )
+    except Exception as e:
+        print(f"[Startup] Failed to inject state to ai_routes: {e}")
     print("[Startup] System ready.")
     yield
     print("[Shutdown] Goodbye.")
