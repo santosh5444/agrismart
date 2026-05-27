@@ -19,9 +19,13 @@ try {
 }
 
 // Helper functions to safely construct Leaflet icons lazily to prevent module evaluation crashes
+let cachedGreenIcon: any = null;
+let cachedBlueIcon: any = null;
+
 const getGreenIcon = () => {
+  if (cachedGreenIcon) return cachedGreenIcon;
   try {
-    return new L.Icon({
+    cachedGreenIcon = new L.Icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
       iconSize: [25, 41],
@@ -29,6 +33,7 @@ const getGreenIcon = () => {
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
     });
+    return cachedGreenIcon;
   } catch (err) {
     console.error("Failed to create Leaflet greenIcon:", err);
     return undefined;
@@ -36,8 +41,9 @@ const getGreenIcon = () => {
 };
 
 const getBlueIcon = () => {
+  if (cachedBlueIcon) return cachedBlueIcon;
   try {
-    return new L.Icon({
+    cachedBlueIcon = new L.Icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
       iconSize: [25, 41],
@@ -45,6 +51,7 @@ const getBlueIcon = () => {
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
     });
+    return cachedBlueIcon;
   } catch (err) {
     console.error("Failed to create Leaflet blueIcon:", err);
     return undefined;

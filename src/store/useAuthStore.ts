@@ -111,10 +111,10 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       activeToken = sessionToken;
     } else {
       // 3. Fallback to path-based checks if no session exists in this tab
-      if (checkPath.includes('/farmer')) {
+      if (checkPath.includes('/farmer') && !checkPath.includes('/login')) {
         activeRole = 'farmer';
         activeToken = localStorage.getItem('persist_farmer_token');
-      } else if (checkPath.includes('/home') || checkPath.includes('/consumer')) {
+      } else if ((checkPath.includes('/home') || checkPath.includes('/consumer')) && !checkPath.includes('/login')) {
         activeRole = 'consumer';
         activeToken = localStorage.getItem('persist_consumer_token');
       } else {
@@ -127,7 +127,8 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
           checkPath === '/index.html' || 
           checkPath.endsWith('index.html') ||
           (!checkPath.includes('/farmer') && !checkPath.includes('/consumer') && !checkPath.includes('/home') && !checkPath.includes('/settings'));
-        if (!isLandingPage) {
+        const isLoginPage = checkPath.includes('/login');
+        if (!isLandingPage && !isLoginPage) {
           const farmerToken = localStorage.getItem('persist_farmer_token');
           const consumerToken = localStorage.getItem('persist_consumer_token');
           console.log("[AuthStore] fallback check in localStorage. farmerToken:", !!farmerToken, "consumerToken:", !!consumerToken);
