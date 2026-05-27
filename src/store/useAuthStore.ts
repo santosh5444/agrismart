@@ -11,7 +11,7 @@ interface UserState {
 }
 
 interface AuthActions {
-  login: (data: { userId: string; name: string; role: 'farmer' | 'consumer'; token: string; mobile?: string }) => void;
+  login: (data: { userId: string; name: string; role: 'farmer' | 'consumer'; token: string; mobile?: string; location?: string }) => void;
   logout: () => void;
   initialize: (routerPath?: string) => void;
   syncTab: () => void;
@@ -26,7 +26,7 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
   isInitialized: false,
 
   login: (data) => {
-    const { userId, name, role, token, mobile } = data;
+    const { userId, name, role, token, mobile, location } = data;
     
     // Clear any existing customer location data and cart to prevent cross-session pollution
     if (role === 'consumer') {
@@ -39,6 +39,12 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
         useCartStore.getState().clearCart();
       } catch (err) {
         console.error("[AuthStore] Failed to clear cart on login:", err);
+      }
+
+      // Pre-populate customer's default district/city registered at login
+      if (location) {
+        localStorage.setItem('consumer_location', location);
+        localStorage.setItem('consumer_district', location);
       }
     }
 
