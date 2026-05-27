@@ -184,7 +184,19 @@ export default function VoiceAssistant({ onCommand, contextDistrict }: VoiceAssi
 
   return (
     <>
-      <div className="fixed bottom-8 right-20 sm:right-28 flex flex-row-reverse flex-nowrap items-center gap-3 z-50 animate-scale-in">
+      <style>{`
+        .voice-assistant-container {
+          right: 5rem !important;
+          left: auto !important;
+        }
+        @media (min-width: 640px) {
+          .voice-assistant-container {
+            right: 7rem !important;
+            left: auto !important;
+          }
+        }
+      `}</style>
+      <div className="fixed bottom-8 voice-assistant-container flex flex-row-reverse flex-nowrap items-center gap-3 z-50 animate-scale-in">
         <button
           onClick={isListening ? stopListening : startListening}
           className={`w-14 h-14 rounded-full shadow-2xl transition-all duration-300 flex flex-col items-center justify-center gap-0.5 ${isListening ? 'bg-red-500 scale-110' : 'bg-green-500 hover:scale-110'} animate-glow`}

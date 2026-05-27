@@ -42,6 +42,13 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
     // Set tab-specific active session details in sessionStorage
     sessionStorage.setItem('active_role', role);
     sessionStorage.setItem('token', token);
+    sessionStorage.setItem('name', name);
+    sessionStorage.setItem('userId', userId);
+    if (mobile) {
+      sessionStorage.setItem('mobile', mobile);
+    } else {
+      sessionStorage.removeItem('mobile');
+    }
 
     set({ userId, name, role, token, mobile: mobile || null, isInitialized: true });
   },
@@ -49,9 +56,12 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
   logout: () => {
     const activeRole = useAuthStore.getState().role;
     
-    // Clear active tab session
+    // Clear active tab session details in sessionStorage
     sessionStorage.removeItem('active_role');
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('name');
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem('mobile');
 
     // Clear persistent credentials for the current role
     if (activeRole) {
@@ -74,30 +84,41 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
   },
 
   initialize: (routerPath?: string) => {
-    const hash = window.location.hash || '';
-    const winPath = window.location.pathname || '';
+    // 1. Normalize path checking. Use routerPath if available, else check hash and browser pathname.
+    let checkPath = routerPath || '';
+    if (!checkPath) {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/')) {
+        checkPath = hash.substring(1);
+      } else {
+        checkPath = window.location.pathname || '';
+      }
+    }
+    // Clean query parameters and hash fragments
+    checkPath = checkPath.split('?')[0].split('#')[0];
     
-    // Normalize path checking. Use routerPath if available, combined with hash and pathname.
-    const checkPath = (routerPath || '') + hash + winPath;
-    
-    console.log("[AuthStore] initialize called. routerPath:", routerPath, "hash:", hash, "winPath:", winPath, "checkPath:", checkPath);
+    console.log("[AuthStore] initialize called. routerPath:", routerPath, "checkPath:", checkPath);
 
     let activeRole: 'farmer' | 'consumer' | null = null;
+    let activeToken: string | null = null;
 
-    // 1. Prioritize tab-isolated sessionStorage first (survives page refreshes)
+    // 2. Prioritize tab-isolated sessionStorage first (survives page refreshes)
     const sessionRole = sessionStorage.getItem('active_role') as 'farmer' | 'consumer' | null;
     const sessionToken = sessionStorage.getItem('token');
 
     if (sessionRole && sessionToken) {
       activeRole = sessionRole;
+      activeToken = sessionToken;
     } else {
-      // 2. Fallback to path-based checks if no session exists in this tab
+      // 3. Fallback to path-based checks if no session exists in this tab
       if (checkPath.includes('/farmer')) {
         activeRole = 'farmer';
+        activeToken = localStorage.getItem('persist_farmer_token');
       } else if (checkPath.includes('/home') || checkPath.includes('/consumer')) {
         activeRole = 'consumer';
+        activeToken = localStorage.getItem('persist_consumer_token');
       } else {
-        // 3. Fallback to localStorage check only if one role is logged in and we are not on landing page
+        // 4. Fallback to localStorage check only if one role is logged in and we are not on landing page
         // (to prevent auto-login conflicts when opening a new tab to '/')
         const isLandingPage = checkPath === '/' || checkPath === '' || checkPath === '/#/';
         if (!isLandingPage) {
@@ -106,47 +127,45 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
           console.log("[AuthStore] fallback check in localStorage. farmerToken:", !!farmerToken, "consumerToken:", !!consumerToken);
           if (farmerToken && !consumerToken) {
             activeRole = 'farmer';
+            activeToken = farmerToken;
           } else if (consumerToken && !farmerToken) {
             activeRole = 'consumer';
+            activeToken = consumerToken;
           }
         }
       }
     }
 
-    console.log("[AuthStore] detected activeRole:", activeRole);
+    console.log("[AuthStore] detected activeRole:", activeRole, "activeToken exists:", !!activeToken);
 
-    if (activeRole === 'farmer') {
-      const token = localStorage.getItem('persist_farmer_token');
-      console.log("[AuthStore] restoring farmer session. Token exists:", !!token);
-      if (token) {
-        sessionStorage.setItem('active_role', 'farmer');
-        sessionStorage.setItem('token', token);
-        set({
-          userId: localStorage.getItem('persist_farmer_userId'),
-          name: localStorage.getItem('persist_farmer_name'),
-          role: 'farmer',
-          token: token,
-          mobile: localStorage.getItem('persist_farmer_mobile'),
-          isInitialized: true,
-        });
-        return;
+    if (activeRole && activeToken) {
+      const prefix = activeRole === 'farmer' ? 'persist_farmer_' : 'persist_consumer_';
+      
+      // Make sure sessionStorage is synced
+      sessionStorage.setItem('active_role', activeRole);
+      sessionStorage.setItem('token', activeToken);
+      
+      // Load name, userId, mobile from localStorage (fallback to sessionStorage)
+      const name = localStorage.getItem(`${prefix}name`) || sessionStorage.getItem('name') || '';
+      const userId = localStorage.getItem(`${prefix}userId`) || sessionStorage.getItem('userId') || '';
+      const mobile = localStorage.getItem(`${prefix}mobile`) || sessionStorage.getItem('mobile') || '';
+
+      // Sync variables back to sessionStorage
+      sessionStorage.setItem('name', name);
+      sessionStorage.setItem('userId', userId);
+      if (mobile) {
+        sessionStorage.setItem('mobile', mobile);
       }
-    } else if (activeRole === 'consumer') {
-      const token = localStorage.getItem('persist_consumer_token');
-      console.log("[AuthStore] restoring consumer session. Token exists:", !!token);
-      if (token) {
-        sessionStorage.setItem('active_role', 'consumer');
-        sessionStorage.setItem('token', token);
-        set({
-          userId: localStorage.getItem('persist_consumer_userId'),
-          name: localStorage.getItem('persist_consumer_name'),
-          role: 'consumer',
-          token: token,
-          mobile: localStorage.getItem('persist_consumer_mobile'),
-          isInitialized: true,
-        });
-        return;
-      }
+
+      set({
+        userId: userId || null,
+        name: name || null,
+        role: activeRole,
+        token: activeToken,
+        mobile: mobile || null,
+        isInitialized: true,
+      });
+      return;
     }
 
     console.log("[AuthStore] no active session or token missing. Clearing session.");
