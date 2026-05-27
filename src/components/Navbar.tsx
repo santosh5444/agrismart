@@ -27,7 +27,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link
-            to={activeRole === 'farmer' ? '/farmer/details' : '/home'}
+            to={activeRole === 'farmer' ? '/farmer/details' : activeRole === 'consumer' ? '/home' : '/'}
             className="flex items-center gap-3 group"
           >
             <div className="relative">

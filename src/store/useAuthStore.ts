@@ -120,7 +120,13 @@ export const useAuthStore = create<UserState & AuthActions>((set) => ({
       } else {
         // 4. Fallback to localStorage check only if one role is logged in and we are not on landing page
         // (to prevent auto-login conflicts when opening a new tab to '/')
-        const isLandingPage = checkPath === '/' || checkPath === '' || checkPath === '/#/';
+        const isLandingPage = 
+          checkPath === '/' || 
+          checkPath === '' || 
+          checkPath === '/#/' || 
+          checkPath === '/index.html' || 
+          checkPath.endsWith('index.html') ||
+          (!checkPath.includes('/farmer') && !checkPath.includes('/consumer') && !checkPath.includes('/home') && !checkPath.includes('/settings'));
         if (!isLandingPage) {
           const farmerToken = localStorage.getItem('persist_farmer_token');
           const consumerToken = localStorage.getItem('persist_consumer_token');

@@ -18,25 +18,38 @@ try {
   console.error("Leaflet default icon fix failed:", err);
 }
 
-// Create custom green marker for farmers
-const greenIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+// Helper functions to safely construct Leaflet icons lazily to prevent module evaluation crashes
+const getGreenIcon = () => {
+  try {
+    return new L.Icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+  } catch (err) {
+    console.error("Failed to create Leaflet greenIcon:", err);
+    return undefined;
+  }
+};
 
-// Create custom blue marker for the consumer
-const blueIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+const getBlueIcon = () => {
+  try {
+    return new L.Icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+  } catch (err) {
+    console.error("Failed to create Leaflet blueIcon:", err);
+    return undefined;
+  }
+};
 
 interface MapProps {
   locations: {
@@ -110,7 +123,7 @@ export default function VegetableMap({ locations = [], consumerLoc }: MapProps) 
         {consumerLoc && 
          typeof consumerLoc.lat === 'number' && !isNaN(consumerLoc.lat) && 
          typeof consumerLoc.lon === 'number' && !isNaN(consumerLoc.lon) && (
-          <Marker position={[consumerLoc.lat, consumerLoc.lon]} icon={blueIcon}>
+          <Marker position={[consumerLoc.lat, consumerLoc.lon]} icon={getBlueIcon()}>
             <Popup>
               <div className="font-sans min-w-[120px] p-1">
                 <h4 className="font-black text-blue-600 flex items-center gap-1.5 text-xs"><User className="w-3.5" /> Your Location</h4>
@@ -127,7 +140,7 @@ export default function VegetableMap({ locations = [], consumerLoc }: MapProps) 
             <Marker 
               key={`${loc.district}-${loc.vegetable}-${i}`} 
               position={[loc.lat, loc.lon]}
-              icon={greenIcon}
+              icon={getGreenIcon()}
             >
               <Popup className="rounded-lg">
                 <div className="font-sans min-w-[150px]">
