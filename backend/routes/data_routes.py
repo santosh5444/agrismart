@@ -141,6 +141,9 @@ class PredictRequest(BaseModel):
     year: int = 2025
     quantity: Optional[float] = 0
 
+_prediction_cache = {}
+_recommendations_cache = {}
+
 @router.post("/predict-price")
 def predict_price_api(req: PredictRequest):
     vegetable = req.vegetable
@@ -148,6 +151,10 @@ def predict_price_api(req: PredictRequest):
     month = req.month
     year = req.year
     
+    cache_key = (vegetable.strip().lower(), district.strip().lower(), month, year)
+    if cache_key in _prediction_cache:
+        return {"success": True, "predicted_price": _prediction_cache[cache_key], "vegetable": vegetable, "district": district}
+
     model = _state.get("model")
     encoders = _state.get("encoders")
     if model is None:
@@ -165,16 +172,22 @@ def predict_price_api(req: PredictRequest):
     price = _state["predict_price"](
         model, encoders, vegetable, district, month, year, avg_yield, avg_area
     )
+    _prediction_cache[cache_key] = price
     return {"success": True, "predicted_price": price, "vegetable": vegetable, "district": district}
 
 @router.get("/recommendations")
 def get_recommendations(district: str = Query("Guntur")):
-    recs = _state["get_recommendations"](district, top_n=8)
-    model = _state.get("model")
-    encoders = _state.get("encoders")
     import datetime
     current_month = datetime.datetime.now().month
     current_year = datetime.datetime.now().year
+    
+    cache_key = (district.strip().lower(), current_month, current_year)
+    if cache_key in _recommendations_cache:
+        return {"success": True, "recommendations": _recommendations_cache[cache_key]}
+
+    recs = _state["get_recommendations"](district, top_n=8)
+    model = _state.get("model")
+    encoders = _state.get("encoders")
 
     result = []
     for r in recs:
@@ -196,6 +209,7 @@ def get_recommendations(district: str = Query("Guntur")):
             "avg_price": round(float(r.get("avg_price") or 0.0), 2),
             "predicted_price": round(float(predicted_price or 0.0), 2),
         })
+    _recommendations_cache[cache_key] = result
     return {"success": True, "recommendations": result}
 
 _district_cache = None

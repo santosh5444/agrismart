@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any
 import bcrypt  # pyre-ignore[21]
 import jwt  # PyJWT
 
-SECRET_KEY = "ag-veg-system-secret-2025"
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "ag-veg-system-secret-2025")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 BCRYPT_ROUNDS = 10  # Optimized for performance

@@ -94,44 +94,40 @@ existing_vegs = prices_df["vegetable"].unique()
 missing_vegs = [v for v in ALL_VEGETABLES_MAP if v not in existing_vegs]
 
 if missing_vegs:
-    print(f"[DataLoader] Augmenting prices and production with missing vegetables: {missing_vegs}")
+    print(f"[DataLoader] Fast-augmenting prices and production for: {missing_vegs}")
     unique_dates = prices_df["date_updated"].unique()
+    dates_dt = pd.to_datetime(unique_dates)
+    months = dates_dt.month.to_numpy()
+    years = dates_dt.year.to_numpy()
     unique_districts = districts_df.to_dict("records")
     
-    synth_prices = []
+    all_synth_records = []
     np.random.seed(42)
+    n_dates = len(unique_dates)
     
     for veg in missing_vegs:
         base_price = ALL_VEGETABLES_MAP[veg]
+        seasonal_effect = np.sin(2 * np.pi * months / 12) * (base_price * 0.15)
+        trend_effect = (years - 2023) * (base_price * 0.04)
+        
         for dist in unique_districts:
+            dist_effect = (dist["district_id"] - 6.5) * (base_price * 0.02)
+            noise = np.random.normal(0, base_price * 0.05, size=n_dates)
+            prices = np.clip(base_price + seasonal_effect + trend_effect + dist_effect + noise, base_price * 0.4, base_price * 2.0).round(2)
+            
             df_temp = pd.DataFrame({
                 "district_id": dist["district_id"],
                 "district": dist["district"],
                 "latitude": dist["latitude"],
                 "longitude": dist["longitude"],
                 "vegetable": veg,
-                "date_updated": unique_dates
+                "date_updated": unique_dates,
+                "price_per_kg_inr": prices
             })
+            all_synth_records.append(df_temp)
             
-            dates = pd.to_datetime(df_temp["date_updated"])
-            months = dates.dt.month
-            years = dates.dt.year
-            
-            # Seasonal variation (15% amplitude)
-            seasonal_effect = np.sin(2 * np.pi * months / 12) * (base_price * 0.15)
-            # Inflation trend (4% per year after 2023)
-            trend_effect = (years - 2023) * (base_price * 0.04)
-            # District price variation (2% per district offset from average)
-            dist_effect = (dist["district_id"] - 6.5) * (base_price * 0.02)
-            # Noise (5% standard deviation)
-            noise = np.random.normal(0, base_price * 0.05, size=len(unique_dates))
-            
-            prices = base_price + seasonal_effect + trend_effect + dist_effect + noise
-            df_temp["price_per_kg_inr"] = np.clip(prices, base_price * 0.4, base_price * 2.0).round(2)
-            synth_prices.append(df_temp)
-            
-    if synth_prices:
-        prices_df = pd.concat([prices_df, pd.concat(synth_prices, ignore_index=True)], ignore_index=True)
+    if all_synth_records:
+        prices_df = pd.concat([prices_df] + all_synth_records, ignore_index=True)
 
     synth_prod = []
     for veg in missing_vegs:

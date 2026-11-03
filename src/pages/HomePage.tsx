@@ -6,8 +6,6 @@ import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { calculateDistance } from '../utils/distance';
 
 interface Recommendation { vegetable: string; district: string; lat: number; lon: number; avg_price: number; predicted_price: number; }
@@ -137,6 +135,8 @@ export default function HomePage() {
   const latestSearchRef = useRef({ query: '', district: '' });
   const latestRequestIdRef = useRef(0);
 
+  const userLocation = locationMode === 'manual' ? manualDistrict : (localStorage.getItem('consumer_location') || 'Guntur');
+
   const calculateTotalDeliveryFee = () => {
     if (deliveryMethod === 'pickup') return 0;
     let fee = 0;
@@ -202,6 +202,10 @@ export default function HomePage() {
            const receiptEl = document.getElementById("receipt-area");
            if (receiptEl) {
              try {
+               const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+                 import('html2canvas'),
+                 import('jspdf'),
+               ]);
                const canvas = await html2canvas(receiptEl, { scale: 2 });
                const imgData = canvas.toDataURL('image/png');
                const pdf = new jsPDF();
@@ -209,7 +213,9 @@ export default function HomePage() {
                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                pdf.save(`AgriSmart_Receipt_${Date.now()}.pdf`);
-             } catch {}
+             } catch (pdfErr) {
+               console.error("PDF generation error:", pdfErr);
+             }
            }
            toast.success("Order Confirmed! Receipt Downloaded.");
            items.forEach(i => removeItem(i.id, i.vegetable, i.farmer_id)); 
@@ -228,7 +234,6 @@ export default function HomePage() {
     } catch (err) { console.error(err); } finally { setPredLoading(false); }
   };
 
-  const userLocation = locationMode === 'manual' ? manualDistrict : (localStorage.getItem('consumer_location') || 'Guntur');
 
   const fetchVegetables = async (query: string, district: string) => {
     const requestId = ++latestRequestIdRef.current;

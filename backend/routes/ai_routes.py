@@ -1,8 +1,14 @@
 import os
 import json
-from googletrans import Translator
+import asyncio
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
+
+try:
+    from googletrans import Translator
+    translator = Translator()
+except Exception:
+    translator = None
 
 router = APIRouter(prefix="/api/ai")
 
@@ -14,28 +20,41 @@ def set_state(**kwargs):
         if k.endswith("_fn"):
             _state[k[:-3]] = v
 
-translator = Translator()
-
 class ChatRequest(BaseModel):
     message: str
     context: str = "general"
 
-def translate_to_english(text: str):
+def _sync_translate_to_en(text: str):
+    if not translator or not text:
+        return text, 'en'
     try:
         detection = translator.detect(text)
-        if detection.lang != 'en':
+        lang = getattr(detection, 'lang', 'en')
+        if lang and lang != 'en':
             translated = translator.translate(text, dest='en')
-            return translated.text, detection.lang
+            return getattr(translated, 'text', text), lang
         return text, 'en'
     except Exception:
         return text, 'en'
 
-def translate_from_english(text: str, target_lang: str):
-    try:
-        if target_lang != 'en':
-            translated = translator.translate(text, dest=target_lang)
-            return translated.text
+def _sync_translate_from_en(text: str, target_lang: str):
+    if not translator or not text or target_lang == 'en':
         return text
+    try:
+        translated = translator.translate(text, dest=target_lang)
+        return getattr(translated, 'text', text)
+    except Exception:
+        return text
+
+async def translate_to_english_async(text: str):
+    try:
+        return await asyncio.wait_for(asyncio.to_thread(_sync_translate_to_en, text), timeout=1.5)
+    except Exception:
+        return text, 'en'
+
+async def translate_from_english_async(text: str, target_lang: str):
+    try:
+        return await asyncio.wait_for(asyncio.to_thread(_sync_translate_from_en, text, target_lang), timeout=1.5)
     except Exception:
         return text
 
@@ -43,7 +62,7 @@ def translate_from_english(text: str, target_lang: str):
 async def chat_endpoint(req: ChatRequest):
     import datetime
     # Internal translation for multi-language support
-    english_msg, detected_lang = translate_to_english(req.message)
+    english_msg, detected_lang = await translate_to_english_async(req.message)
     msg_lower = english_msg.lower()
     
     # Identify vegetable and district matches
@@ -159,7 +178,7 @@ async def chat_endpoint(req: ChatRequest):
             response = "I didn’t quite understand, please rephrase. You can ask me about selling crops, predicted prices, delivery options, or how to buy!"
 
     # Translate back to user's language
-    final_response = translate_from_english(response, detected_lang)
+    final_response = await translate_from_english_async(response, detected_lang)
     
     return {
         "success": True, 

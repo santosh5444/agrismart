@@ -46,14 +46,27 @@ export default function FarmerDetails() {
           
           const now = new Date();
           const preds: Record<string, number> = {};
-          await Promise.all(fetchedCrops.map(async (c: any) => {
+          // Deduplicate vegetable-district pairs to prevent redundant API calls
+          const uniquePairs = new Map<string, { veg: string; dist: string }>();
+          fetchedCrops.forEach((c: any) => {
+            const key = `${c.vegetable}__${c.district}`;
+            if (!uniquePairs.has(key)) {
+              uniquePairs.set(key, { veg: c.vegetable, dist: c.district });
+            }
+          });
+          const pairPreds: Record<string, number> = {};
+          await Promise.all(Array.from(uniquePairs.entries()).map(async ([key, pair]) => {
             try {
               const pRes = await api.post('/predict-price', {
-                vegetable: c.vegetable, district: c.district, month: now.getMonth() + 1, year: now.getFullYear()
+                vegetable: pair.veg, district: pair.dist, month: now.getMonth() + 1, year: now.getFullYear()
               });
-              if (pRes.data.success) preds[c.id] = pRes.data.predicted_price;
+              if (pRes.data.success) pairPreds[key] = pRes.data.predicted_price;
             } catch {}
           }));
+          fetchedCrops.forEach((c: any) => {
+            const key = `${c.vegetable}__${c.district}`;
+            if (pairPreds[key] !== undefined) preds[c.id] = pairPreds[key];
+          });
           setPredictions(preds);
         }
       } catch (err) { console.error(err); }
@@ -61,6 +74,7 @@ export default function FarmerDetails() {
     };
     loadData();
 
+    // Sensible polling interval (15s) when window is active
     const pollInterval = setInterval(async () => {
       if (document.hidden) return;
       try {
@@ -69,7 +83,7 @@ export default function FarmerDetails() {
           setCrops((prev) => JSON.stringify(prev) === JSON.stringify(res.data.crops) ? prev : res.data.crops);
         }
       } catch {}
-    }, 5000);
+    }, 15000);
     return () => clearInterval(pollInterval);
   }, [farmerCropsEndpoint]);
 

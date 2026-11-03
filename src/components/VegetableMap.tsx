@@ -18,20 +18,22 @@ try {
   console.error("Leaflet default icon fix failed:", err);
 }
 
-// Helper functions to safely construct Leaflet icons lazily to prevent module evaluation crashes
+// Safe, zero-network SVG markers that never break or fail to load
 let cachedGreenIcon: any = null;
 let cachedBlueIcon: any = null;
+
+const greenSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="28" height="40" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 24 12 24s12-15 12-24c0-6.63-5.37-12-12-12z" fill="#16a34a" stroke="#ffffff" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffffff"/></svg>`;
+const blueSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="28" height="40" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 24 12 24s12-15 12-24c0-6.63-5.37-12-12-12z" fill="#2563eb" stroke="#ffffff" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffffff"/></svg>`;
 
 const getGreenIcon = () => {
   if (cachedGreenIcon) return cachedGreenIcon;
   try {
-    cachedGreenIcon = new L.Icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
+    cachedGreenIcon = L.divIcon({
+      className: 'custom-green-marker',
+      html: greenSvg,
+      iconSize: [28, 40],
+      iconAnchor: [14, 40],
+      popupAnchor: [0, -36]
     });
     return cachedGreenIcon;
   } catch (err) {
@@ -43,13 +45,12 @@ const getGreenIcon = () => {
 const getBlueIcon = () => {
   if (cachedBlueIcon) return cachedBlueIcon;
   try {
-    cachedBlueIcon = new L.Icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
+    cachedBlueIcon = L.divIcon({
+      className: 'custom-blue-marker',
+      html: blueSvg,
+      iconSize: [28, 40],
+      iconAnchor: [14, 40],
+      popupAnchor: [0, -36]
     });
     return cachedBlueIcon;
   } catch (err) {

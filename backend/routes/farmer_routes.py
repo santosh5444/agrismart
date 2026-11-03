@@ -3,18 +3,41 @@ import os
 import threading
 import uuid
 import math
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from typing import Optional, List
 
 try:
     from ..db_helper import db_load, db_save
+    from ..auth import decode_token
 except ImportError:
     from db_helper import db_load, db_save
+    from auth import decode_token
 
 router = APIRouter(prefix="/api/farmer")
 
 _db_lock = threading.Lock()
+
+def _verify_farmer_auth(authorization: Optional[str], farmer_id: str = "", mobile: str = "") -> bool:
+    if not authorization:
+        return True
+    try:
+        token = authorization.replace("Bearer ", "").strip()
+        decoded = decode_token(token)
+        if not decoded:
+            return False
+        token_sub = str(decoded.get("sub", ""))
+        token_mobile = str(decoded.get("mobile", ""))
+        token_role = str(decoded.get("role", ""))
+        if token_role and token_role != "farmer":
+            return False
+        if farmer_id and token_sub and token_sub != farmer_id:
+            return False
+        if mobile and token_mobile and token_mobile != mobile:
+            return False
+        return True
+    except Exception:
+        return False
 
 def _load_crops():
     crops = db_load("crops", [])
@@ -59,51 +82,63 @@ class FarmerDetailsRequest(BaseModel):
     lon: Optional[float] = None
 
 @router.post("/details")
-def submit_farmer_details(req: FarmerDetailsRequest):
+def submit_farmer_details(req: FarmerDetailsRequest, authorization: Optional[str] = Header(None)):
     if req.price <= 0 or req.quantity <= 0 or not req.vegetable or not req.district:
         return {"success": False, "message": "Invalid listing data. Price and quantity must be positive."}
         
-    crops = _load_crops()
-    entry = req.dict()
-    entry["id"] = entry.get("id") or str(uuid.uuid4())
-    
-    # Auth lookup fallback
-    if not entry.get("name") or not entry.get("mobile"):
-        try:
-            users = db_load("users", {"farmers": {}, "consumers": {}})
-            for profile in users.get("farmers", {}).values():
-                if profile.get("id") == req.farmer_id:
-                    if not entry.get("name"): entry["name"] = profile.get("name", "")
-                    if not entry.get("mobile"): entry["mobile"] = profile.get("mobile", "")
-                    break
-        except Exception as e:
-            print(f"[Farmer Routes] Auth lookup fallback error: {e}")
+    if not _verify_farmer_auth(authorization, req.farmer_id, req.mobile):
+        return {"success": False, "message": "Unauthorized farmer operation"}
 
-    crops.append(entry)
-    _save_crops(crops)
-    return {"success": True, "message": "Crop details saved successfully", "entry": entry}
+    with _db_lock:
+        crops = _load_crops()
+        entry = req.dict()
+        entry["id"] = entry.get("id") or str(uuid.uuid4())
+        
+        # Auth lookup fallback
+        if not entry.get("name") or not entry.get("mobile"):
+            try:
+                users = db_load("users", {"farmers": {}, "consumers": {}})
+                for profile in users.get("farmers", {}).values():
+                    if profile.get("id") == req.farmer_id:
+                        if not entry.get("name"): entry["name"] = profile.get("name", "")
+                        if not entry.get("mobile"): entry["mobile"] = profile.get("mobile", "")
+                        break
+            except Exception as e:
+                print(f"[Farmer Routes] Auth lookup fallback error: {e}")
+
+        crops.append(entry)
+        _save_crops(crops)
+        return {"success": True, "message": "Crop details saved successfully", "entry": entry}
 
 @router.put("/crops/{crop_id}")
-def update_crop(crop_id: str, req: FarmerDetailsRequest):
-    crops = _load_crops()
-    for i, c in enumerate(crops):
-        if c.get("id") == crop_id and _matches_farmer(c, req.farmer_id, req.mobile):
-            updated = req.dict()
-            updated["id"] = crop_id
-            updated["farmer_id"] = req.farmer_id
-            crops[i] = updated
-            _save_crops(crops)
-            return {"success": True, "message": "Crop updated", "entry": updated}
-    return {"success": False, "message": "Crop not found or unauthorized"}
+def update_crop(crop_id: str, req: FarmerDetailsRequest, authorization: Optional[str] = Header(None)):
+    if not _verify_farmer_auth(authorization, req.farmer_id, req.mobile):
+        return {"success": False, "message": "Unauthorized farmer operation"}
+
+    with _db_lock:
+        crops = _load_crops()
+        for i, c in enumerate(crops):
+            if c.get("id") == crop_id and _matches_farmer(c, req.farmer_id, req.mobile):
+                updated = req.dict()
+                updated["id"] = crop_id
+                updated["farmer_id"] = req.farmer_id
+                crops[i] = updated
+                _save_crops(crops)
+                return {"success": True, "message": "Crop updated", "entry": updated}
+        return {"success": False, "message": "Crop not found or unauthorized"}
 
 @router.delete("/crops/{crop_id}")
-def delete_crop(crop_id: str, farmer_id: str = "", mobile: str = ""):
-    crops = _load_crops()
-    filtered = [c for c in crops if not (c.get("id") == crop_id and _matches_farmer(c, farmer_id, mobile))]
-    if len(crops) == len(filtered):
-        return {"success": False, "message": "Crop not found or unauthorized"}
-    _save_crops(filtered)
-    return {"success": True, "message": "Crop deleted"}
+def delete_crop(crop_id: str, farmer_id: str = "", mobile: str = "", authorization: Optional[str] = Header(None)):
+    if not _verify_farmer_auth(authorization, farmer_id, mobile):
+        return {"success": False, "message": "Unauthorized farmer operation"}
+
+    with _db_lock:
+        crops = _load_crops()
+        filtered = [c for c in crops if not (c.get("id") == crop_id and _matches_farmer(c, farmer_id, mobile))]
+        if len(crops) == len(filtered):
+            return {"success": False, "message": "Crop not found or unauthorized"}
+        _save_crops(filtered)
+        return {"success": True, "message": "Crop deleted"}
 
 @router.get("/crops")
 def get_farmer_crops(farmer_id: str = "", mobile: str = ""):
