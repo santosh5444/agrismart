@@ -3,6 +3,8 @@ import api from '../api';
 import { PackageOpen, MapPin, Scale, Plus, Loader2, Navigation, CheckCircle2, Sprout, IndianRupee } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import VoiceAssistant from '../components/VoiceAssistant';
+import PriceTrendModal from '../components/PriceTrendModal';
+import { TrendingUp } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -20,6 +22,11 @@ export default function FarmerDetails() {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [trendModal, setTrendModal] = useState<{ open: boolean; vegetable: string; district: string }>({
+    open: false,
+    vegetable: '',
+    district: '',
+  });
   const navigate = useNavigate();
 
   const { userId: farmerId, name: farmerName, mobile: farmerMobile } = useAuthStore();
@@ -198,7 +205,16 @@ export default function FarmerDetails() {
             {formData.district && formData.vegetable && (
               <div className="mt-5 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex justify-between items-center text-center">
                 <div className="text-left"><h4 className="font-bold text-white text-sm">AI Market Prediction</h4><p className="text-[10px] text-blue-200/60">Based on recent trends in {formData.district}</p></div>
-                {checkingPrice ? <Loader2 className="animate-spin text-blue-400" /> : <div className="text-2xl font-black text-blue-400">₹{predictedPrice?.toFixed(1)}<span className="text-xs ml-1">/kg</span></div>}
+                <div className="flex items-center gap-3">
+                  {checkingPrice ? <Loader2 className="animate-spin text-blue-400" /> : <div className="text-2xl font-black text-blue-400">₹{predictedPrice?.toFixed(1)}<span className="text-xs ml-1">/kg</span></div>}
+                  <button
+                    type="button"
+                    onClick={() => setTrendModal({ open: true, vegetable: formData.vegetable, district: formData.district })}
+                    className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" /> 30-Day Trend
+                  </button>
+                </div>
               </div>
             )}
 
@@ -223,7 +239,16 @@ export default function FarmerDetails() {
                     <div className="flex border border-yellow-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-yellow-500/10 text-yellow-300">₹{c.price}/kg</span><button onClick={()=>handleUpdate(c.id, {price: c.price+1})} className="px-2 bg-yellow-500/20">+</button><button onClick={()=>handleUpdate(c.id, {price: Math.max(1, c.price-1)})} className="px-2 bg-yellow-500/20">-</button></div>
                     <div className="flex border border-green-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-green-500/10 text-green-400">{c.quantity}kg</span><button onClick={()=>handleUpdate(c.id, {quantity: c.quantity+1})} className="px-2 bg-green-500/20">+</button><button onClick={()=>handleUpdate(c.id, {quantity: Math.max(1, c.quantity-1)})} className="px-2 bg-green-500/20">-</button></div>
                   </div>
-                  <button onClick={()=>handleDelete(c.id)} className="text-[10px] text-red-400 hover:underline">Delete</button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTrendModal({ open: true, vegetable: c.vegetable, district: c.district })}
+                      className="text-[10px] text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"
+                    >
+                      <TrendingUp className="w-3 h-3" /> Forecast
+                    </button>
+                    <button onClick={()=>handleDelete(c.id)} className="text-[10px] text-red-400 hover:underline">Delete</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -231,6 +256,13 @@ export default function FarmerDetails() {
         </div>
       </div>
       <VoiceAssistant onCommand={handleVoiceCommand} contextDistrict={formData.district || 'Guntur'} />
+
+      <PriceTrendModal
+        isOpen={trendModal.open}
+        vegetable={trendModal.vegetable}
+        district={trendModal.district}
+        onClose={() => setTrendModal({ open: false, vegetable: '', district: '' })}
+      />
     </>
   );
 }

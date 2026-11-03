@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import VegetableMap from '../components/VegetableMap';
+import PriceTrendModal from '../components/PriceTrendModal';
+import { TrendingUp } from 'lucide-react';
 import { Search, MapPin, TrendingDown, Loader2, Sparkles, IndianRupee, ChevronDown, Star, ShoppingCart, Trash2, Plus, Minus, Package, Truck, Store as StoreIcon, X } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -52,6 +54,11 @@ export default function HomePage() {
   const [manualPincode, setManualPincode] = useState(localStorage.getItem('consumer_pincode') || '');
 
   const [geocodingStatus, setGeocodingStatus] = useState('');
+  const [trendModal, setTrendModal] = useState<{ open: boolean; vegetable: string; district: string }>({
+    open: false,
+    vegetable: '',
+    district: '',
+  });
   const [resolvedAddress, setResolvedAddress] = useState('');
 
   useEffect(() => {
@@ -139,30 +146,9 @@ export default function HomePage() {
 
   const calculateTotalDeliveryFee = () => {
     if (deliveryMethod === 'pickup') return 0;
-    let fee = 0;
-    
-    // Group items by unique farmer_id to charge delivery fee once per farmer location
-    const uniqueFarmers = new Map<string, { lat?: number; lon?: number }>();
-    items.forEach(i => {
-      if (i.farmer_id && !uniqueFarmers.has(i.farmer_id)) {
-        uniqueFarmers.set(i.farmer_id, { lat: i.lat, lon: i.lon });
-      }
-    });
-
-    uniqueFarmers.forEach((coords) => {
-      if (consumerLoc && typeof coords.lat === 'number' && typeof coords.lon === 'number') {
-        const dist = calculateDistance(consumerLoc.lat, consumerLoc.lon, coords.lat, coords.lon);
-        if (dist !== null && !isNaN(dist)) {
-          fee += Math.max(25, Math.floor(25 + dist * 5));
-        } else {
-          fee += 35;
-        }
-      } else {
-        fee += 35;
-      }
-    });
-
-    return fee;
+    const subtotal = getTotal();
+    if (subtotal >= 199) return 0; // FREE Delivery on orders >= ₹199
+    return 20; // Affordable flat ₹20 fee regardless of number of farmers
   };
 
   const handleProceedCheckout = async () => {
@@ -332,12 +318,45 @@ export default function HomePage() {
                   </div>
                   {items.length > 0 && (
                     <div className="p-6 border-t border-white/5 bg-white/5 space-y-4">
-                      <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="grid grid-cols-2 gap-3 mb-3">
                         <button onClick={() => setDeliveryMethod('delivery')} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${deliveryMethod === 'delivery' ? 'border-blue-500/50 bg-blue-500/10' : 'border-white/10'}`}><Truck className="w-5" /><span className="text-[10px] font-bold">Delivery</span></button>
                         <button onClick={() => setDeliveryMethod('pickup')} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${deliveryMethod === 'pickup' ? 'border-blue-500/50 bg-blue-500/10' : 'border-white/10'}`}><StoreIcon className="w-5" /><span className="text-[10px] font-bold">Pickup</span></button>
                       </div>
+
+                      {deliveryMethod === 'delivery' && (
+                        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs mb-3">
+                          {getTotal() >= 199 ? (
+                            <p className="text-green-400 font-bold flex items-center gap-1.5">
+                              🎉 <span>FREE Delivery Unlocked! (Order &gt;= ₹199)</span>
+                            </p>
+                          ) : (
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between text-[11px] text-slate-300">
+                                <span>Add <b>₹{199 - getTotal()}</b> more for <b>FREE Delivery</b></span>
+                                <span className="text-blue-400 font-bold">₹{getTotal()}/199</span>
+                              </div>
+                              <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div 
+                                  className="bg-blue-500 h-full rounded-full transition-all duration-300" 
+                                  style={{ width: `${Math.min(100, (getTotal() / 199) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex justify-between text-sm"><span>Subtotal</span><span>₹{getTotal()}</span></div>
-                      <div className="flex justify-between text-sm"><span>Delivery</span><span className="text-green-400 font-bold">{deliveryMethod === 'delivery' ? `₹${calculateTotalDeliveryFee()}` : 'Free'}</span></div>
+                      <div className="flex justify-between text-sm">
+                        <span>Delivery</span>
+                        <span className="text-green-400 font-bold">
+                          {deliveryMethod === 'pickup' 
+                            ? 'Free (Self-Pickup)' 
+                            : calculateTotalDeliveryFee() === 0 
+                              ? 'FREE (Order >= ₹199)' 
+                              : '₹20 Flat Rate'}
+                        </span>
+                      </div>
                       <div className="flex justify-between border-t border-white/10 pt-4 mb-4"><span className="text-lg font-black text-white">Total</span><span className="text-2xl font-black text-green-400">₹{getTotal() + calculateTotalDeliveryFee()}</span></div>
                       {deliveryMethod === 'delivery' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0) && (
                         <p className="text-[10px] text-red-400 font-bold text-center mt-2">
@@ -515,7 +534,17 @@ export default function HomePage() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Farmer</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setTrendModal({ open: true, vegetable: res.vegetable, district: res.district }); }}
+                            className="p-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold flex items-center gap-1 transition-all"
+                            title="View 30-Day AI Price Forecast"
+                          >
+                            <TrendingUp className="w-3 h-3" />
+                          </button>
+                          <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20">Farmer</span>
+                        </div>
                       </div>
                       <div className="flex justify-between items-center text-[11px] mb-3">
                         <span className="text-slate-400">Price</span>
@@ -544,12 +573,26 @@ export default function HomePage() {
                   <div className="flex justify-between items-start mb-4"><div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">{getEmoji(rec.vegetable)}</div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-1 uppercase"><Star className="w-2.5 h-2.5" /> AI Pick</span></div>
                   <h3 className="font-black text-white mb-1">{rec.vegetable}</h3><p className="text-[10px] text-slate-500 flex items-center gap-1 mb-4"><MapPin className="w-2.5" /> {rec.district}</p>
                   <div className="pt-3 border-t border-white/5"><p className="text-[9px] font-bold uppercase text-slate-500 mb-1">Predicted</p><p className="text-2xl font-black text-white">₹{rec.predicted_price}<span className="text-xs font-normal text-slate-500 ml-1">/kg</span></p></div>
+                  <button
+                    type="button"
+                    onClick={() => setTrendModal({ open: true, vegetable: rec.vegetable, district: rec.district })}
+                    className="w-full mt-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 text-[10px] font-bold flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <TrendingUp className="w-3 h-3" /> 30-Day AI Trend
+                  </button>
                 </div>
               );
             })}
           </div>
         </div>
       </div>
+
+      <PriceTrendModal
+        isOpen={trendModal.open}
+        vegetable={trendModal.vegetable}
+        district={trendModal.district}
+        onClose={() => setTrendModal({ open: false, vegetable: '', district: '' })}
+      />
     </>
   );
 }
