@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
-import { MapPin, User } from 'lucide-react';
+import { MapPin, User, Phone } from 'lucide-react';
+import { getVegTelugu } from '../utils/telugu';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -153,7 +154,12 @@ export default function VegetableMap({ locations = [], consumerLoc }: MapProps) 
               <Popup className="rounded-lg">
                 <div className="font-sans min-w-[150px]">
                   <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-lg text-agri-900 leading-tight">{loc.vegetable}</h3>
+                    <div>
+                      <h3 className="font-bold text-base text-gray-900 leading-tight">{loc.vegetable}</h3>
+                      {getVegTelugu(loc.vegetable) && (
+                        <span className="text-[11px] text-green-700 font-bold block">{getVegTelugu(loc.vegetable)}</span>
+                      )}
+                    </div>
                     {loc.type === 'Farmer' && (
                       <span className="bg-orange-100 text-orange-700 text-[9px] px-1.5 py-0.5 rounded font-bold uppercase">Farmer</span>
                     )}
@@ -163,9 +169,14 @@ export default function VegetableMap({ locations = [], consumerLoc }: MapProps) 
                   </p>
                   
                   {loc.type === 'Farmer' ? (
-                    <div className="border-t border-gray-100 pt-2 space-y-1">
-                      <p className="text-[11px] text-gray-600 font-medium">Seller: {loc.farmer_name}</p>
-                      <p className="text-[11px] text-agri-600 font-bold">Call: {loc.mobile}</p>
+                    <div className="border-t border-gray-100 pt-2 space-y-2">
+                      <p className="text-[11px] text-gray-600 font-medium">Seller: <span className="text-gray-900 font-bold">{loc.farmer_name}</span></p>
+                      <a 
+                        href={`tel:${loc.mobile}`} 
+                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold shadow-sm transition-all text-center w-full"
+                      >
+                        <Phone className="w-3 h-3" /> Call: {loc.mobile}
+                      </a>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between border-t border-gray-100 pt-2">

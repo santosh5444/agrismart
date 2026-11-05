@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import VegetableMap from '../components/VegetableMap';
 import PriceTrendModal from '../components/PriceTrendModal';
+import { getVegTelugu } from '../utils/telugu';
+import { Phone } from 'lucide-react';
 import { TrendingUp } from 'lucide-react';
 import { Search, MapPin, TrendingDown, Loader2, Sparkles, IndianRupee, ChevronDown, Star, ShoppingCart, Trash2, Plus, Minus, Package, Truck, Store as StoreIcon, X } from 'lucide-react';
 import { useCartStore } from '../store/useCartStore';
@@ -405,7 +407,7 @@ export default function HomePage() {
         <div className="relative overflow-hidden rounded-3xl p-8 glass" style={{ border: '1px solid rgba(34,197,94,0.2)' }}>
           <div className="flex items-center gap-3 mb-4"><div className="p-2 bg-green-500/20 rounded-xl"><Sparkles className="w-5 h-5 text-green-400" /></div><h2 className="text-white font-black text-xl">AI Price Predictor</h2></div>
           <div className="flex flex-wrap gap-4 items-end">
-             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">Vegetable</label><select value={predVeg} onChange={e=>setPredVeg(e.target.value)} style={selectStyle}><option value="">Select...</option>{safeVegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+             <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">Vegetable</label><select value={predVeg} onChange={e=>setPredVeg(e.target.value)} style={selectStyle}><option value="">Select...</option>{safeVegetables.map(v=><option key={v} value={v}>{v} {getVegTelugu(v) ? `(${getVegTelugu(v)})` : ''}</option>)}</select></div>
              <div className="flex-1 min-w-[150px]"><label className="text-xs font-bold uppercase block mb-1.5 text-green-300/70">District</label><select value={predDistrict} onChange={e=>setPredDistrict(e.target.value)} style={selectStyle}><option value="">Select...</option>{safeDistricts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
              <button onClick={handlePredict} disabled={!predVeg || !predDistrict || predLoading} className="px-8 py-3 rounded-xl font-black text-white bg-green-600 hover:bg-green-500 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50 flex items-center gap-2">
                {predLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />} Predict
@@ -528,7 +530,10 @@ export default function HomePage() {
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{getEmoji(res.vegetable)}</span>
                           <div>
-                            <h4 className="font-bold text-white text-xs">{res.vegetable}</h4>
+                            <h4 className="font-bold text-white text-xs flex items-center gap-1">
+                              <span>{res.vegetable}</span>
+                              {getVegTelugu(res.vegetable) && <span className="text-[10px] text-green-400/90 font-medium">({getVegTelugu(res.vegetable)})</span>}
+                            </h4>
                             <p className="text-[10px] text-slate-400">
                               📍 {res.district} {distance !== null ? `(${distance} km)` : ''}
                             </p>
@@ -550,7 +555,28 @@ export default function HomePage() {
                         <span className="text-slate-400">Price</span>
                         <span className="font-black text-white">₹{res.avg_price}<span className="text-[9px] font-normal text-slate-500 ml-0.5">/kg</span></span>
                       </div>
-                      <button onClick={() => { if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: res.mobile || 'N/A', lat: res.lat, lon: res.lon }); toast.success("Added to cart!"); }} className="w-full py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100"><Plus className="w-3" /> Add to Cart</button>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => { 
+                            if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } 
+                            addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: res.mobile || 'N/A', lat: res.lat, lon: res.lon }); 
+                            toast.success("Added to cart!"); 
+                          }} 
+                          className="flex-1 py-1.5 rounded-lg bg-blue-600/15 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase flex items-center justify-center gap-1.5"
+                        >
+                          <Plus className="w-3" /> Add to Cart
+                        </button>
+                        {res.mobile && res.mobile !== 'N/A' && (
+                          <a
+                            href={`tel:${res.mobile}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 flex items-center justify-center transition-all"
+                            title={`Call Farmer (${res.mobile})`}
+                          >
+                            <Phone className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -571,7 +597,10 @@ export default function HomePage() {
               return (
                 <div key={i} className="p-5 rounded-2xl glass border-white/5 hover:border-green-500/30 transition-all card-lift">
                   <div className="flex justify-between items-start mb-4"><div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-2xl">{getEmoji(rec.vegetable)}</div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-1 uppercase"><Star className="w-2.5 h-2.5" /> AI Pick</span></div>
-                  <h3 className="font-black text-white mb-1">{rec.vegetable}</h3><p className="text-[10px] text-slate-500 flex items-center gap-1 mb-4"><MapPin className="w-2.5" /> {rec.district}</p>
+                  <h3 className="font-black text-white mb-1 flex items-baseline gap-1.5">
+                    <span>{rec.vegetable}</span>
+                    {getVegTelugu(rec.vegetable) && <span className="text-xs text-green-400/90 font-medium">({getVegTelugu(rec.vegetable)})</span>}
+                  </h3><p className="text-[10px] text-slate-500 flex items-center gap-1 mb-4"><MapPin className="w-2.5" /> {rec.district}</p>
                   <div className="pt-3 border-t border-white/5"><p className="text-[9px] font-bold uppercase text-slate-500 mb-1">Predicted</p><p className="text-2xl font-black text-white">₹{rec.predicted_price}<span className="text-xs font-normal text-slate-500 ml-1">/kg</span></p></div>
                   <button
                     type="button"

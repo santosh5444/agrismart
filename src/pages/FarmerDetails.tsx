@@ -4,6 +4,7 @@ import { PackageOpen, MapPin, Scale, Plus, Loader2, Navigation, CheckCircle2, Sp
 import { useNavigate } from 'react-router-dom';
 import VoiceAssistant from '../components/VoiceAssistant';
 import PriceTrendModal from '../components/PriceTrendModal';
+import { getVegTelugu } from '../utils/telugu';
 import { TrendingUp } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
@@ -190,7 +191,7 @@ export default function FarmerDetails() {
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid md:grid-cols-4 gap-5">
               <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><MapPin className="w-4" /> District</label><select required value={formData.district} onChange={e=>setFormData({...formData, district: e.target.value})} style={selectStyle}><option value="">Select...</option>{districts.map(d=><option key={d.district} value={d.district}>{d.district}</option>)}</select></div>
-              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><PackageOpen className="w-4" /> Vegetable</label><select required value={formData.vegetable} onChange={e=>setFormData({...formData, vegetable: e.target.value})} style={selectStyle}><option value="">Select...</option>{vegetables.map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+              <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><PackageOpen className="w-4" /> Vegetable</label><select required value={formData.vegetable} onChange={e=>setFormData({...formData, vegetable: e.target.value})} style={selectStyle}><option value="">Select...</option>{vegetables.map(v=><option key={v} value={v}>{v} {getVegTelugu(v) ? `(${getVegTelugu(v)})` : ''}</option>)}</select></div>
               <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><Scale className="w-4" /> Quantity (kg)</label><input type="number" required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value})} className="input-dark" /></div>
               <div className="space-y-2"><label className="text-sm font-bold flex items-center gap-1.5 text-green-300/80"><IndianRupee className="w-4" /> Price (₹/kg)</label><input type="number" required min="1" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} className={`input-dark ${priceError ? 'border-red-500' : ''}`} /></div>
             </div>
@@ -233,7 +234,10 @@ export default function FarmerDetails() {
           <div className="divide-y divide-white/5">
             {crops.length === 0 ? <div className="p-16 text-center opacity-30"><p>No crops listed.</p></div> : crops.map((c, i) => (
               <div key={c.id || i} className="p-5 flex items-center justify-between hover:bg-white/5 transition-all">
-                <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center font-black text-green-400">{c.vegetable[0]}</div><div><h3 className="font-bold text-white text-sm">{c.vegetable}</h3><p className="text-[10px] text-slate-500">📍 {c.district}</p></div></div>
+                <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center font-black text-green-400">{c.vegetable[0]}</div><div><h3 className="font-bold text-white text-sm flex items-center gap-1.5">
+                      <span>{c.vegetable}</span>
+                      {getVegTelugu(c.vegetable) && <span className="text-[11px] text-green-400 font-medium">({getVegTelugu(c.vegetable)})</span>}
+                    </h3><p className="text-[10px] text-slate-500">📍 {c.district}</p></div></div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex gap-2">
                     <div className="flex border border-yellow-500/30 rounded-full overflow-hidden text-[10px] font-bold"><span className="px-3 py-1 bg-yellow-500/10 text-yellow-300">₹{c.price}/kg</span><button onClick={()=>handleUpdate(c.id, {price: c.price+1})} className="px-2 bg-yellow-500/20">+</button><button onClick={()=>handleUpdate(c.id, {price: Math.max(1, c.price-1)})} className="px-2 bg-yellow-500/20">-</button></div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, TrendingUp, TrendingDown, Minus, Loader2, Sparkles, Calendar, Info, IndianRupee } from 'lucide-react';
 import api from '../api';
+import { getVegTelugu } from '../utils/telugu';
 
 interface PricePoint {
   date: string;
@@ -103,7 +104,12 @@ export default function PriceTrendModal({ vegetable, district, isOpen, onClose }
               <span className="p-2 rounded-xl bg-blue-500/20 text-blue-400">
                 <Sparkles className="w-5 h-5" />
               </span>
-              <h2 className="text-2xl font-black text-white">{vegetable}</h2>
+              <div className="flex items-baseline gap-2">
+                <h2 className="text-2xl font-black text-white">{vegetable}</h2>
+                {getVegTelugu(vegetable) && (
+                  <span className="text-lg text-green-400 font-bold">({getVegTelugu(vegetable)})</span>
+                )}
+              </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-bold border border-white/10">
                 📍 {district}
               </span>
