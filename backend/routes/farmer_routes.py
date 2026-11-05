@@ -193,19 +193,16 @@ def checkout_validate(req: CheckoutRequest):
         if float(c.get("quantity", 0)) < item.quantity:
             return {"success": False, "message": f"Insufficient stock for {c.get('vegetable', 'item')}"}
         
-        # Delivery / Pickup range enforcement
+        # Home Delivery range enforcement (Strict 10km limit)
         c_lat = c.get("lat")
         c_lon = c.get("lon")
         if req.consumer_lat is not None and req.consumer_lon is not None and c_lat is not None and c_lon is not None:
             dist = calculate_distance(req.consumer_lat, req.consumer_lon, c_lat, c_lon)
-            if req.delivery_type == "home_delivery" and (dist is None or dist > 10.0):
-                return {"success": False, "message": f"Delivery only available within 10km. {c.get('vegetable')} is too far ({dist if dist is not None else 'unknown'} km)."}
-            elif req.delivery_type == "pickup" and (dist is None or dist > 20.0):
-                return {"success": False, "message": f"Self-pickup only available within 20km. {c.get('vegetable')} is too far ({dist if dist is not None else 'unknown'} km)."}
+            if dist is None or dist > 10.0:
+                return {"success": False, "message": f"Home delivery only available within 10km. {c.get('vegetable')} is {dist if dist is not None else 'unknown'} km away."}
         elif req.consumer_district and c.get("district"):
             if req.consumer_district.strip().lower() != c.get("district").strip().lower():
-                msg_type = "Delivery" if req.delivery_type == "home_delivery" else "Self-pickup"
-                return {"success": False, "message": f"{msg_type} only available within same district. {c.get('vegetable')} is in {c.get('district')}."}
+                return {"success": False, "message": f"Home delivery only available within same district. {c.get('vegetable')} is in {c.get('district')}."}
                     
     return {"success": True}
 
@@ -225,14 +222,11 @@ def checkout_confirm(req: CheckoutRequest):
             c_lon = c.get("lon")
             if req.consumer_lat is not None and req.consumer_lon is not None and c_lat is not None and c_lon is not None:
                 dist = calculate_distance(req.consumer_lat, req.consumer_lon, c_lat, c_lon)
-                if req.delivery_type == "home_delivery" and (dist is None or dist > 10.0):
+                if dist is None or dist > 10.0:
                     return {"success": False, "message": "Delivery location outside 10km range limit during confirmation."}
-                elif req.delivery_type == "pickup" and (dist is None or dist > 20.0):
-                    return {"success": False, "message": "Self-pickup location outside 20km range limit during confirmation."}
             elif req.consumer_district and c.get("district"):
                 if req.consumer_district.strip().lower() != c.get("district").strip().lower():
-                    msg_type = "Delivery" if req.delivery_type == "home_delivery" else "Self-pickup"
-                    return {"success": False, "message": f"{msg_type} location outside district boundary during confirmation."}
+                    return {"success": False, "message": "Delivery location outside district boundary during confirmation."}
                         
         for item in req.items:
             c = crop_map.get(str(item.product_id))

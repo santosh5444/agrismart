@@ -305,7 +305,7 @@ def get_vegetables(
             "id": c.get("id"),
             "farmer_id": c.get("farmer_id"),
             "farmer_name": c.get("name"),
-            "mobile": c.get("mobile"),
+            "mobile": "Protected (Managed Delivery)",
             "vegetable": c.get("vegetable"),
             "district": c.get("district"),
             "lat": c_lat,

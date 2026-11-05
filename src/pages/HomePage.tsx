@@ -40,7 +40,8 @@ export default function HomePage() {
   const [predLoading, setPredLoading] = useState(false);
   
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
+  const deliveryMethod = 'delivery';
+  const PLATFORM_FEE = 5;
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'receipt'>('cart');
   const [isProcessing, setIsProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
@@ -147,10 +148,9 @@ export default function HomePage() {
   const userLocation = locationMode === 'manual' ? manualDistrict : (localStorage.getItem('consumer_location') || 'Guntur');
 
   const calculateTotalDeliveryFee = () => {
-    if (deliveryMethod === 'pickup') return 0;
     const subtotal = getTotal();
     if (subtotal >= 199) return 0; // FREE Delivery on orders >= ₹199
-    return 20; // Affordable flat ₹20 fee regardless of number of farmers
+    return 20; // Flat ₹20 delivery fee
   };
 
   const handleProceedCheckout = async () => {
@@ -167,7 +167,7 @@ export default function HomePage() {
        };
        const res = await api.post('/farmer/checkout/validate', req);
        if (res.data.success) {
-           setReceiptData({ id: 'RCPT-' + Math.floor(Math.random() * 1000000), date: new Date().toLocaleString(), delivery: deliveryMethod, total: getTotal() + calculateTotalDeliveryFee(), items: [...items] });
+           setReceiptData({ id: 'RCPT-' + Math.floor(Math.random() * 1000000), date: new Date().toLocaleString(), delivery: deliveryMethod, total: getTotal() + calculateTotalDeliveryFee() + PLATFORM_FEE, items: [...items] });
            setCheckoutStep('receipt');
        } else { toast.error(res.data.message || "Insufficient stock."); }
     } catch (e: any) { toast.error(e.response?.data?.message || "Server error, try again"); }
@@ -320,62 +320,59 @@ export default function HomePage() {
                   </div>
                   {items.length > 0 && (
                     <div className="p-6 border-t border-white/5 bg-white/5 space-y-4">
-                      <div className="grid grid-cols-2 gap-3 mb-3">
-                        <button onClick={() => setDeliveryMethod('delivery')} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${deliveryMethod === 'delivery' ? 'border-blue-500/50 bg-blue-500/10' : 'border-white/10'}`}><Truck className="w-5" /><span className="text-[10px] font-bold">Delivery</span></button>
-                        <button onClick={() => setDeliveryMethod('pickup')} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${deliveryMethod === 'pickup' ? 'border-blue-500/50 bg-blue-500/10' : 'border-white/10'}`}><StoreIcon className="w-5" /><span className="text-[10px] font-bold">Pickup</span></button>
+                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 mb-3">
+                        <Truck className="w-4 h-4 text-blue-400 shrink-0" />
+                        <span>Direct doorstep delivery from local farmers to your location.</span>
                       </div>
 
-                      {deliveryMethod === 'delivery' && (
-                        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs mb-3">
-                          {getTotal() >= 199 ? (
-                            <p className="text-green-400 font-bold flex items-center gap-1.5">
-                              🎉 <span>FREE Delivery Unlocked! (Order &gt;= ₹199)</span>
-                            </p>
-                          ) : (
-                            <div className="space-y-1.5">
-                              <div className="flex justify-between text-[11px] text-slate-300">
-                                <span>Add <b>₹{199 - getTotal()}</b> more for <b>FREE Delivery</b></span>
-                                <span className="text-blue-400 font-bold">₹{getTotal()}/199</span>
-                              </div>
-                              <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                <div 
-                                  className="bg-blue-500 h-full rounded-full transition-all duration-300" 
-                                  style={{ width: `${Math.min(100, (getTotal() / 199) * 100)}%` }}
-                                />
-                              </div>
+                      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs mb-3">
+                        {getTotal() >= 199 ? (
+                          <p className="text-green-400 font-bold flex items-center gap-1.5">
+                            🎉 <span>FREE Delivery Unlocked! (Order &gt;= ₹199)</span>
+                          </p>
+                        ) : (
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-[11px] text-slate-300">
+                              <span>Add <b>₹{199 - getTotal()}</b> more for <b>FREE Delivery</b></span>
+                              <span className="text-blue-400 font-bold">₹{getTotal()}/199</span>
                             </div>
-                          )}
-                        </div>
-                      )}
+                            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                              <div 
+                                className="bg-blue-500 h-full rounded-full transition-all duration-300" 
+                                style={{ width: `${Math.min(100, (getTotal() / 199) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                      <div className="flex justify-between text-sm"><span>Subtotal</span><span>₹{getTotal()}</span></div>
+                      <div className="flex justify-between text-sm"><span>Produce Subtotal</span><span>₹{getTotal()}</span></div>
                       <div className="flex justify-between text-sm">
-                        <span>Delivery</span>
+                        <span>Home Delivery</span>
                         <span className="text-green-400 font-bold">
-                          {deliveryMethod === 'pickup' 
-                            ? 'Free (Self-Pickup)' 
-                            : calculateTotalDeliveryFee() === 0 
-                              ? 'FREE (Order >= ₹199)' 
-                              : '₹20 Flat Rate'}
+                          {calculateTotalDeliveryFee() === 0 
+                            ? 'FREE (Order >= ₹199)' 
+                            : '₹20 Flat Rate'}
                         </span>
                       </div>
-                      <div className="flex justify-between border-t border-white/10 pt-4 mb-4"><span className="text-lg font-black text-white">Total</span><span className="text-2xl font-black text-green-400">₹{getTotal() + calculateTotalDeliveryFee()}</span></div>
-                      {deliveryMethod === 'delivery' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0) && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-300 flex items-center gap-1">
+                          Platform & Tech Fee
+                          <span className="text-[10px] text-slate-500">(Supports AgriSmart)</span>
+                        </span>
+                        <span className="text-white font-medium">₹{PLATFORM_FEE}</span>
+                      </div>
+                      <div className="flex justify-between border-t border-white/10 pt-4 mb-4"><span className="text-lg font-black text-white">Total</span><span className="text-2xl font-black text-green-400">₹{getTotal() + calculateTotalDeliveryFee() + PLATFORM_FEE}</span></div>
+                      {items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0) && (
                         <p className="text-[10px] text-red-400 font-bold text-center mt-2">
-                          ⚠️ Some items in your basket are too far (&gt;10km) for home delivery. Please choose Self-Pickup or remove them.
-                        </p>
-                      )}
-                      {deliveryMethod === 'pickup' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 20.0) && (
-                        <p className="text-[10px] text-red-400 font-bold text-center mt-2">
-                          ⚠️ Some items in your basket are too far (&gt;20km) even for self-pickup. Please remove them.
+                          ⚠️ Some items in your basket are too far (&gt;10km) for home delivery. Please remove them.
                         </p>
                       )}
                       <button 
                         onClick={handleProceedCheckout} 
                         disabled={
                           isProcessing || 
-                          (deliveryMethod === 'delivery' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0)) ||
-                          (deliveryMethod === 'pickup' && items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 20.0))
+                          items.some(i => consumerLoc && i.lat && i.lon && (calculateDistance(consumerLoc.lat, consumerLoc.lon, i.lat, i.lon) || 0) > 10.0)
                         } 
                         className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue-500 disabled:opacity-50"
                       >
@@ -393,7 +390,8 @@ export default function HomePage() {
                        {receiptData?.items.map((it:any) => (<div key={it.id} className="flex justify-between text-xs"><span>{it.quantity}kg x {it.vegetable}</span><span>₹{it.price * it.quantity}</span></div>))}
                     </div>
                     <div className="mt-4 flex justify-between font-black text-lg"><span>TOTAL</span><span>₹{receiptData?.total}</span></div>
-                    {receiptData?.delivery === 'pickup' && <p className="mt-4 text-[10px] text-slate-500">Please visit individual farmer locations to collect your items.</p>}
+                    <div className="flex justify-between text-xs text-slate-500 pt-2 border-t mt-2"><span>Platform & Service Fee</span><span>₹5</span></div>
+                    <p className="mt-4 text-[10px] text-slate-500">🚚 Direct doorstep delivery from local farmers. Packaged and dispatched to your registered address.</p>
                   </div>
                   <button onClick={handleConfirmOrder} disabled={isProcessing} className="w-full py-4 rounded-2xl bg-green-500 text-white font-black hover:bg-green-400 disabled:opacity-50">{isProcessing ? <Loader2 className="animate-spin" /> : 'Confirm Order & Download'}</button>
                 </div>
@@ -555,28 +553,16 @@ export default function HomePage() {
                         <span className="text-slate-400">Price</span>
                         <span className="font-black text-white">₹{res.avg_price}<span className="text-[9px] font-normal text-slate-500 ml-0.5">/kg</span></span>
                       </div>
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => { 
-                            if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } 
-                            addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: res.mobile || 'N/A', lat: res.lat, lon: res.lon }); 
-                            toast.success("Added to cart!"); 
-                          }} 
-                          className="flex-1 py-1.5 rounded-lg bg-blue-600/15 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase flex items-center justify-center gap-1.5"
-                        >
-                          <Plus className="w-3" /> Add to Cart
-                        </button>
-                        {res.mobile && res.mobile !== 'N/A' && (
-                          <a
-                            href={`tel:${res.mobile}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 flex items-center justify-center transition-all"
-                            title={`Call Farmer (${res.mobile})`}
-                          >
-                            <Phone className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
+                      <button 
+                        onClick={() => { 
+                          if(!res.id || !res.farmer_id) { toast.error("Invalid listing data"); return; } 
+                          addItem({ id: res.id, vegetable: res.vegetable, district: res.district, quantity: 1, price: res.avg_price, farmer_name: res.farmer_name || 'Farmer', farmer_id: res.farmer_id, mobile: 'Protected', lat: res.lat, lon: res.lon }); 
+                          toast.success("Added to cart!"); 
+                        }} 
+                        className="w-full py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all text-[11px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Add to Cart
+                      </button>
                     </div>
                   );
                 })}

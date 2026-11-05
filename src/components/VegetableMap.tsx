@@ -169,14 +169,13 @@ export default function VegetableMap({ locations = [], consumerLoc }: MapProps) 
                   </p>
                   
                   {loc.type === 'Farmer' ? (
-                    <div className="border-t border-gray-100 pt-2 space-y-2">
+                    <div className="border-t border-gray-100 pt-2 space-y-1.5">
                       <p className="text-[11px] text-gray-600 font-medium">Seller: <span className="text-gray-900 font-bold">{loc.farmer_name}</span></p>
-                      <a 
-                        href={`tel:${loc.mobile}`} 
-                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold shadow-sm transition-all text-center w-full"
-                      >
-                        <Phone className="w-3 h-3" /> Call: {loc.mobile}
-                      </a>
+                      <div className="pt-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-md font-bold">
+                          ✅ Verified Farm · Home Delivery
+                        </span>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between border-t border-gray-100 pt-2">
